@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>横屏首屏布局 · 演示</title>
+<style>
+  :root{
+    --bg:#07080d;
+    --card:#12151d;
+    --card2:#171b25;
+    --line:rgba(255,255,255,.08);
+    --txt:#eef1f7;
+    --dim:#8b93a7;
+    --dim2:#5f6678;
+    --accent:#ffd166;
+    --r:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0}
+  body{
+    background:linear-gradient(135deg,#B4CBE4 0%,#6685B6 100%);
+    color:var(--txt);
+    font-family:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  /* ---------- 舞台（2560 × 1600，内部按 1280 × 800 布局 2 倍放大） ---------- */
+  .viewport{width:2560px;height:1600px;transform-origin:center center;flex:0 0 auto}
+  .stage{
+    width:1280px;height:800px;padding:18px 166px 20px 20px;
+    transform:scale(2);transform-origin:0 0;
+    display:flex;flex-direction:column;gap:14px;
+    border-radius:24px;overflow:hidden;position:relative;
+    background:linear-gradient(135deg,#B4CBE4 0%,#6685B6 100%);
+    box-shadow:0 30px 80px rgba(23,43,73,.34), 0 0 0 1px rgba(255,255,255,.28);
+  }
+  .stage::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(760px 340px at 16% -6%,rgba(255,255,255,.38),transparent 68%);
+  }
+  .stage>*{position:relative}
+
+  /* ---------- 顶部 App Bar ---------- */
+  .appbar{height:40px;display:flex;align-items:center;gap:22px;flex:0 0 auto}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;letter-spacing:.5px;color:#12233a}
+  .brand-mark{
+    width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12px;color:#0a0c12;
+    background:linear-gradient(135deg,#ffd166,#ff8a5c);box-shadow:0 4px 14px rgba(255,160,80,.35)
+  }
+  .tabs{display:flex;gap:4px;font-size:13px;color:rgba(18,35,58,.62)}
+  .tab{padding:6px 12px;border-radius:9px;cursor:pointer;transition:.2s}
+  .tab.active{color:#0a0c12;background:linear-gradient(135deg,#fff,#dfe4f0);font-weight:700}
+  .tab:not(.active):hover{background:rgba(255,255,255,.42);color:#12233a}
+
+
+  /* ---------- 右侧页签栏 ---------- */
+  .stage>.rail{
+    position:absolute;right:82px;top:18px;bottom:20px;width:68px;z-index:6;
+    display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0;
+    border-radius:18px;border:1px solid rgba(255,255,255,.26);
+    background:#7E9FCB;
+    backdrop-filter:blur(12px);
+    box-shadow:0 16px 40px rgba(16,32,54,.22)
+  }
+  .rail-logo{
+    width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:13px;
+    color:#0a0c12;background:linear-gradient(135deg,#ffd166,#ff8a5c);margin-bottom:10px;
+    box-shadow:0 6px 18px rgba(255,160,80,.35)
+  }
+  .rail-item{
+    width:48px;padding:11px 0;border:0;border-radius:12px;background:transparent;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-family:inherit;font-size:11px;letter-spacing:.5px;color:rgba(255,255,255,.9);transition:.22s
+  }
+  .rail-item .ri{font-size:15px;line-height:1;opacity:.8}
+  .rail-item:hover{background:rgba(255,255,255,.18);color:#fff}
+  .rail-item:hover .ri{opacity:1}
+  .rail-item.on{
+    color:#0b0d13;background:linear-gradient(135deg,#ffe08a,#ffb04d);
+    box-shadow:0 8px 20px rgba(30,55,88,.28)
+  }
+  .rail-item.on .ri{opacity:1}
+  .rail-foot{margin-top:auto}
+
+  /* ---------- 一级页签栏（更外层） ---------- */
+  .stage>.rail2{
+    position:absolute;right:12px;top:18px;bottom:20px;width:60px;z-index:7;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0;
+    border-radius:18px;border:1px solid rgba(255,209,102,.34);
+    background:#4E82B2;
+    backdrop-filter:blur(12px);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04), 0 16px 40px rgba(16,32,54,.22)
+  }
+  .rail2-item{
+    width:44px;padding:10px 0 8px;border:0;border-radius:12px;background:transparent;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-family:inherit;font-size:11.5px;font-weight:600;letter-spacing:.5px;
+    color:rgba(255,255,255,.9);transition:.22s
+  }
+  .rail2-item .ri2{font-size:15px;line-height:1;opacity:.8}
+  .rail2-item:hover{background:rgba(255,255,255,.07);color:#e6ebf6}
+  .rail2-item.on{
+    color:#0b0d13;background:linear-gradient(135deg,#ffe08a,#ffb04d);
+    box-shadow:0 8px 20px rgba(255,176,77,.32)
+  }
+  .rail2-item.on .ri2{opacity:1}
+  .rail2-sep{
+    width:26px;height:1px;margin:2px 0 4px;
+    background:linear-gradient(90deg,transparent,rgba(255,209,102,.45),transparent)
+  }
+
+  /* ---------- 通用卡片 ---------- */
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r);position:relative;overflow:hidden;
+    box-shadow:0 12px 30px rgba(18,36,60,.18)
+  }
+  .row-top{display:grid;grid-template-columns:490px 1fr;gap:14px;height:296px;padding:0 12px;flex:0 0 auto}
+  .col-l{display:flex;flex-direction:column;gap:8px;min-height:0}
+  .col-title{
+    margin:0;height:18px;line-height:18px;flex:0 0 auto;
+    font-size:13.5px;font-weight:700;letter-spacing:.4px;color:#12233a
+  }
+
+  /* ---------- ① Banner ---------- */
+  .banner{flex:1;min-height:0;border:0}
+  .banner-track{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;opacity:0;transition:opacity .55s ease;pointer-events:none}
+  .slide.on{opacity:1;pointer-events:auto}
+  .slide-bg{position:absolute;inset:0;opacity:.92}
+  .slide-bg::after{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 78% 46%, rgba(255,255,255,.16), transparent 40%),
+      linear-gradient(90deg, rgba(6,8,13,.86) 0%, rgba(6,8,13,.52) 42%, rgba(6,8,13,.05) 72%),
+      linear-gradient(0deg, rgba(6,8,13,.72), transparent 55%);
+  }
+  .slide-art{
+    position:absolute;right:14px;top:50%;transform:translateY(-50%) scale(.86);
+    width:128px;height:128px;border-radius:50%;display:grid;place-items:center;font-size:58px;
+    background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.34),rgba(255,255,255,.04) 62%);
+    border:1px solid rgba(255,255,255,.28);
+    box-shadow:inset 0 0 50px rgba(255,255,255,.16), 0 20px 60px rgba(0,0,0,.42);
+    transition:transform .8s cubic-bezier(.2,.7,.3,1);
+  }
+  .slide.on .slide-art{transform:translateY(-50%) scale(1) rotate(-4deg)}
+  .slide-ring{
+    position:absolute;right:-46px;top:50%;transform:translateY(-50%);
+    width:206px;height:206px;border-radius:50%;border:1px dashed rgba(255,255,255,.24)
+  }
+  .slide-body{position:absolute;left:24px;bottom:34px;max-width:56%}
+  .slide-body h2{margin:0 0 8px;font-size:26px;line-height:1.15;letter-spacing:.5px;text-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .slide-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .slide-tags span{
+    font-size:11px;color:#e6ecfa;padding:3px 8px;border-radius:6px;
+    background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(4px)
+  }
+  /* 左上角作者 */
+  .slide-author{
+    position:absolute;left:24px;top:14px;z-index:3;display:flex;align-items:center;gap:5px;
+    font-size:11px;color:rgba(255,255,255,.92);text-shadow:0 2px 10px rgba(0,0,0,.5)
+  }
+  .slide-author .auico{
+    width:11px;height:11px;display:grid;place-items:center;color:#fff;
+    background:none;border:0
+  }
+  .slide-author .auico svg{width:11px;height:11px}
+  /* 右上角游玩数 */
+  .slide-plays{
+    position:absolute;right:22px;top:14px;z-index:3;display:flex;align-items:center;gap:4px;
+    font-size:10px;font-weight:700;color:#FF9CC0;text-shadow:0 2px 10px rgba(0,0,0,.55)
+  }
+  .slide-plays svg{width:14px;height:14px}
+
+  .banner-ui{position:absolute;left:24px;right:18px;bottom:16px;display:flex;align-items:center;justify-content:flex-end}
+  .dots{display:flex;gap:5px;align-items:center}
+  .dot{width:16px;height:2px;background:rgba(255,255,255,.3);cursor:pointer;transition:.25s;border:0;padding:0}
+  .dot.on{width:24px;background:#fff}
+
+  /* ---------- ② 热玩趋势 / 创作之星 / 鉴赏专栏 ---------- */
+  .trends{height:100%;padding:26px 0 0;display:flex;flex-direction:column;gap:0;background:transparent;border:0;border-radius:0;overflow:visible}
+  .trends-grid{
+    flex:1;min-height:0;display:grid;grid-template-columns:297fr 259fr;grid-template-rows:0.89fr 1fr;gap:10px;
+  }
+  .sub{
+    background:linear-gradient(160deg,#F4FAFF,#D8E7F8 62%);
+    border:0;border-radius:14px;padding:11px;position:relative;overflow:hidden;
+    box-shadow:0 12px 28px rgba(23,43,73,.16)
+  }
+  .sub-label{display:flex;align-items:center;gap:5px;font-size:10.5px;color:#5A7290;letter-spacing:.4px}
+  .sub-label .ico{font-size:11px;filter:saturate(1.2)}
+
+  /* 热玩趋势 */
+  .hot{grid-column:1;grid-row:1;padding-bottom:6px}
+  .hot-theme{font-size:12.5px;font-weight:700;color:#12233a;display:flex;align-items:center;gap:5px;margin-top:0;min-width:0}
+  .hot-theme .hash{font-style:normal;font-weight:800;color:#8AA0B4}
+  .hot-theme .ht-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hot-theme .hot-more{
+    flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;height:15px;padding:0 6px;
+    font-family:inherit;font-size:9px;font-weight:600;line-height:1;letter-spacing:.2px;
+    color:#3B556F;background:rgba(23,43,73,.05);border:1px solid rgba(23,43,73,.14);
+    cursor:pointer;white-space:nowrap;transition:background .2s,color .2s,border-color .2s
+  }
+  .hot-theme .hot-more:hover{background:#7E9FCB;border-color:#7E9FCB;color:#fff}
+  .hot-theme .heat{
+    font-size:9px;font-weight:700;color:#FF4D8D;white-space:nowrap
+  }
+  /* 话题标题与切换圆点同高；标题下的玩法整体上移 */
+  .hot .sub-label{align-items:center;margin-bottom:2px}
+  .hot .fade-wrap{margin-top:2px}
+  .hot .fade-item{display:flex;flex-direction:column;justify-content:center}
+  /* 话题下的玩法卡：与创作之星封面卡同尺寸；卡片连续缓慢左移，循环展示更多玩法 */
+  .hot-cards{overflow-x:hidden;overflow-y:visible;margin-top:0;position:relative;flex:1 1 auto;min-height:0}
+  .hot-track{display:flex;width:max-content;height:100%;animation:hotMarquee 20s linear infinite}
+  .hot-group{display:flex;gap:8px;padding-right:8px;flex:0 0 auto;height:100%}
+  .hot-cards:hover .hot-track{animation-play-state:paused}
+  /* 卡片间隔处不落投影，保持干净无底框 */
+  /* 玩法名与封底下边沿留出距离 */
+  .hot-cards .wk{flex:0 0 auto;height:100%;width:auto;aspect-ratio:512/330;box-shadow:none;padding-bottom:10px}
+  @keyframes hotMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .sub-label .mini-dots{margin-left:auto}
+  /* 模块名后的榜单入口 */
+  .sub-more{
+    flex:0 0 auto;display:inline-block;height:15px;padding:0 7px;margin-left:2px;
+    font:inherit;font-size:9px;font-weight:600;letter-spacing:.2px;line-height:13px;
+    color:#5A7290;cursor:pointer;white-space:nowrap;
+    background:rgba(23,43,73,.05);border:1px solid rgba(23,43,73,.12);
+    transition:background .2s,color .2s,border-color .2s
+  }
+  .sub-more:hover{background:#E0A21A;border-color:#E0A21A;color:#fff}
+  /* 榜单入口紧跟标题 */
+  .star .sub-more{position:static;margin-left:2px;z-index:4}
+
+  /* 创作之星：标题 + 单行作者（左：头像/昵称，右：与热玩趋势同款的玩法卡） */
+  .star{grid-column:1;grid-row:2}
+  .star .sub-label{align-items:center;margin-bottom:4px}
+  .star .sub-name{font-size:12.5px;font-weight:700;letter-spacing:.4px;color:#3B556F;white-space:nowrap}
+  .star .fade-item{display:flex;flex-direction:column;gap:3px}
+  .star-body{display:flex;align-items:center;gap:7px;min-width:0;flex:1 1 0;min-height:0}
+  .star-face{
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex:0 0 auto;
+    border:1px solid rgba(23,43,73,.16)
+  }
+  .star-info{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:0}
+  .star-name{font-size:11.5px;font-weight:700;color:#12233a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 名下方：关注按钮，已关注为标签态 */
+  .star-follow{
+    flex:0 0 auto;height:20px;padding:0 10px;border-radius:10px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;line-height:1;letter-spacing:.2px;
+    border:1px solid #FF4D8D;background:#FF4D8D;color:#fff;
+    box-shadow:0 2px 6px rgba(255,77,141,.3);
+    transition:background .18s,border-color .18s,color .18s,box-shadow .18s
+  }
+  .star-follow:hover{background:#FF2E78;border-color:#FF2E78}
+  .star-follow.on{background:#fff;border-color:rgba(23,43,73,.2);color:#5C7488;box-shadow:none}
+  .star-follow.on:hover{background:#F1F5F9;border-color:rgba(23,43,73,.3);color:#12233a}
+
+  /* 通用玩法封面卡 */
+  .wk{
+    position:relative;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;
+    padding:0 8px 5px;border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 8px 20px rgba(0,0,0,.38)
+  }
+  .wk::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(0deg,rgba(7,9,14,.92),rgba(7,9,14,.22) 58%,rgba(7,9,14,.02))
+  }
+  .wk .wico{
+    position:absolute;left:8px;top:5px;z-index:1;font-size:44px;line-height:1;
+    filter:drop-shadow(0 8px 14px rgba(0,0,0,.5))
+  }
+  /* 之星玩法卡：与热玩趋势卡同款布局与尺寸（左下玩法名、右上游玩数） */
+  .star-work{
+    flex:0 0 auto;height:85.5px;max-height:100%;width:auto;aspect-ratio:512/330;align-self:center;
+    padding-bottom:10px;box-shadow:0 4px 12px rgba(0,0,0,.3)
+  }
+  /* 封面右上角游玩数 */
+  .wstat{
+    position:absolute;right:7px;top:5px;z-index:3;display:flex;align-items:center;gap:2px;
+    font-size:9px;font-weight:700;color:#FF4D8D;
+    text-shadow:0 1px 6px rgba(255,255,255,.9)
+  }
+  .wstat svg{width:11px;height:11px}
+  .wmeta{position:relative;z-index:2;min-width:0}
+  .wmeta .wt{font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 6px rgba(0,0,0,.7)}
+  .fade-wrap{position:relative;flex:1;min-height:0}
+  .fade-item{position:absolute;inset:0;opacity:0;transform:translateY(6px);transition:opacity .45s,transform .45s;pointer-events:none}
+  .fade-item.on{opacity:1;transform:none;pointer-events:auto}
+
+  /* 鉴赏专栏 */
+  .review{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;padding:0}
+  .review-cover{position:relative;width:100%;aspect-ratio:512/330;flex:0 0 auto;overflow:hidden}
+  /* 玩法封面与“大家都在玩”卡封面同尺寸：封面止于玩法名条上方 */
+  .review-cover .cover-art{
+    position:absolute;left:1px;right:1px;top:1px;bottom:31px;display:grid;place-items:center;font-size:66px;
+    filter:drop-shadow(0 10px 22px rgba(0,0,0,.45))
+  }
+  /* 封面底部白底玩法名条：与“大家都在玩”的 .gname 同高 */
+  .review-cover::before{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:30px;z-index:2;pointer-events:none;
+    background:rgba(255,255,255,.94);border-top:1px solid rgba(23,43,73,.08)
+  }
+  /* 封面右上角游玩数 */
+  .cover-stat{
+    position:absolute;right:12px;top:10px;z-index:3;display:flex;align-items:center;gap:3px;
+    font-size:9.5px;font-weight:700;color:#FF5C97;
+    text-shadow:0 1px 6px rgba(255,255,255,.85),0 1px 2px rgba(255,255,255,.9)
+  }
+  .cover-stat svg{width:13px;height:13px}
+  /* 封面左上角玩法创作者：与“大家都在玩”卡作者位置/字号保持一致 */
+  .review-author{
+    position:absolute;left:12px;top:11px;z-index:3;display:flex;align-items:center;gap:4px;
+    max-width:62%;font-size:10px;font-weight:600;letter-spacing:.2px;color:rgba(255,255,255,.94);
+    text-shadow:0 1px 6px rgba(6,10,18,.5)
+  }
+  .review-author svg{width:10px;height:10px;flex:0 0 auto}
+  .review-author span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .review-inner{padding:6px 11px 5px;flex:1;min-height:0;display:flex;flex-direction:column;position:relative;z-index:2}
+  /* 玩法名落在封面下方的白底名条内，与“大家都在玩”的卡名条一致 */
+  .review-map{
+    position:absolute;left:11px;right:11px;bottom:0;height:30px;z-index:3;
+    display:flex;align-items:center;
+    font-size:13.5px;line-height:1;font-weight:700;letter-spacing:.3px;color:#12233a
+  }
+  .review-map>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .review-who{margin-top:4px;display:flex;align-items:center;gap:6px;font-size:10px;color:#5A7290}
+  .review-who .mini-dots{margin-left:auto;flex:0 0 auto}
+  .review-who .dotav{
+    width:17px;height:17px;border-radius:5px!important;display:grid;place-items:center;font-size:11px;line-height:1;
+    background:rgba(23,43,73,.1);box-shadow:inset 0 0 0 1px rgba(23,43,73,.08)
+  }
+  .review-quote{
+    margin-top:4px;font-size:10.5px;line-height:1.5;color:#3B556F;flex:1;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    min-height:32px;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.7,.3,1)
+  }
+  .review-quote::before{content:"“";color:rgba(193,134,26,.8);font-size:14px;margin-right:1px}
+  .review-foot{
+    margin-top:3px;padding-top:4px;border-top:1px solid rgba(23,43,73,.12);
+    display:flex;align-items:center;gap:8px;font-size:9.5px;color:#6C8298
+  }
+  .review-foot .k{margin-left:auto;color:#0E8C62}
+  .mini-dots{display:flex;gap:4px}
+  .mini-dots i{width:4px;height:4px;border-radius:2px;background:rgba(23,43,73,.18);transition:.3s}
+  .mini-dots i.on{width:12px;background:#E0A21A}
+
+  /* ---------- ③ 大家都在玩 ---------- */
+  .playing{flex:1;min-height:0;padding:12px;display:flex;flex-direction:column;gap:8px;position:relative}
+  .sec-head{display:flex;align-items:center;gap:8px}
+  .sec-head h3{margin:0;font-size:13.5px;letter-spacing:.4px;color:#12233a}
+  .sec-head .sub-t{font-size:10px;color:rgba(18,35,58,.55)}
+  .games{
+    flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);
+    grid-template-rows:repeat(2,auto);align-content:center;gap:12px
+  }
+  .game{
+    position:relative;aspect-ratio:512/330;border-radius:0;overflow:hidden;cursor:pointer;
+    display:flex;flex-direction:column;background:#fff;
+    border:1px solid rgba(23,43,73,.1);transition:transform .25s,box-shadow .25s,border-color .25s
+  }
+  .gcover{position:relative;flex:1;min-height:0;overflow:hidden}
+  .gcover::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(0deg,rgba(255,255,255,.55),rgba(255,255,255,.14) 52%,rgba(255,255,255,0) 84%)
+  }
+  .game:hover{transform:translateY(-4px);border-color:rgba(23,43,73,.28);box-shadow:0 18px 38px rgba(23,43,73,.24)}
+  .gcover>*{position:relative;z-index:2}
+  .gcover .gico{
+    position:absolute!important;right:16px;top:50%;transform:translateY(-50%);
+    font-size:46px;opacity:.92;z-index:1;
+    filter:drop-shadow(0 8px 16px rgba(23,43,73,.22))
+  }
+  /* 封面左上角作者 */
+  .gcover .gauthor{
+    position:absolute;left:11px;top:10px;z-index:3;display:flex;align-items:center;gap:4px;
+    font-size:10px;font-weight:600;color:rgba(18,35,58,.72);
+    text-shadow:0 1px 6px rgba(255,255,255,.9)
+  }
+  .gcover .gauthor svg{width:10px;height:10px}
+  /* 封面右上角游玩数 */
+  .gcover .gstat{
+    position:absolute;right:13px;top:11px;z-index:3;display:flex;align-items:center;gap:3px;
+    font-size:9.5px;font-weight:700;color:#FF4D8D;
+    text-shadow:0 1px 6px rgba(255,255,255,.9)
+  }
+  .gstat svg{width:13px;height:13px}
+  /* 封面左下角玩法标签 */
+  .gcover .gtag{
+    position:absolute;left:11px;bottom:9px;z-index:3;
+    font-size:9.5px;font-weight:600;color:rgba(18,35,58,.7);
+    padding:2px 7px;background:rgba(255,255,255,.55);
+    border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(4px)
+  }
+  /* 封面外：浅白底玩法名 */
+  .gname{
+    flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:0 10px;height:30px;
+    background:rgba(255,255,255,.94);border-top:1px solid rgba(23,43,73,.08)
+  }
+  .gname .gn{font-size:13.5px;font-weight:700;letter-spacing:.3px;color:#12233a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* ---------- 布局说明标注 ---------- */
+  .anno-chip{
+    position:absolute;left:8px;top:8px;z-index:20;width:19px;height:19px;border-radius:50%;
+    display:grid;place-items:center;font-size:11px;font-weight:700;color:#0b0d13;
+    background:var(--accent);box-shadow:0 0 0 3px rgba(255,209,102,.18);opacity:0;transition:.3s
+  }
+  .anno-tag{
+    position:absolute;left:8px;bottom:8px;z-index:20;font-size:9.5px;padding:2px 6px;border-radius:5px;
+    color:#ffe9b0;background:rgba(255,209,102,.14);border:1px solid rgba(255,209,102,.4);
+    opacity:0;transition:.3s;white-space:nowrap;pointer-events:none
+  }
+  body.annotate .anno-chip,body.annotate .anno-tag{opacity:1}
+  body.annotate [data-anno]{outline:1px dashed rgba(255,209,102,.55);outline-offset:-1px;border-radius:12px}
+
+  .legend{
+    position:fixed;left:50%;bottom:14px;transform:translate(-50%,26px);z-index:99;
+    display:flex;gap:18px;align-items:center;padding:10px 18px;border-radius:14px;
+    background:rgba(12,15,22,.88);border:1px solid rgba(255,209,102,.3);backdrop-filter:blur(10px);
+    font-size:11.5px;color:#cfd6e6;opacity:0;transition:.35s;pointer-events:none
+  }
+  body.annotate .legend{opacity:1;transform:translate(-50%,0)}
+  .legend b{color:var(--accent);margin-right:4px}
+
+  .toggle{
+    position:fixed;left:22px;bottom:22px;z-index:100;font-size:12px;color:#0b0d13;font-weight:700;
+    padding:9px 16px;border-radius:22px;border:0;cursor:pointer;
+    background:linear-gradient(135deg,#ffe08a,#ffb04d);box-shadow:0 10px 30px rgba(255,176,77,.35)
+  }
+
+  /* ---------- 全局取消圆角（仅保留圆形指示元素） ---------- */
+  *,*::before,*::after{border-radius:0!important}
+  .dot,.slide-art,.slide-ring,.anno-chip{border-radius:50%!important}
+  .star-face{border-radius:10px!important}
+  .mini-dots i{border-radius:2px!important}
+
+  /* ---------- 点击跳转弹窗 ---------- */
+  /* 弹层铺在「绿洲启元」页面（.stage）之内，尺寸与页面一致，不再覆盖外侧大背景 */
+  .stage>.mlayer{
+    position:absolute;inset:0;z-index:9000;display:flex;justify-content:flex-end;
+    opacity:0;pointer-events:none;transition:opacity .22s
+  }
+  .mlayer.show{opacity:1;pointer-events:auto}
+  .mlayer .mscrim{position:absolute;inset:0;background:rgba(8,14,24,.66)}
+  .mlayer .mpanel{
+    position:relative;height:100%;width:100%;display:flex;flex-direction:column;min-width:0;
+    background:#F5F8FC;box-shadow:-30px 0 70px rgba(6,12,22,.42);
+    transform:translateX(26px);transition:transform .26s ease
+  }
+  .mlayer.half .mpanel{width:80%}
+  .mlayer.show .mpanel{transform:none}
+  .mclose{
+    position:absolute;right:16px;top:16px;z-index:6;width:36px;height:36px;padding:0;
+    font-family:inherit;font-size:16px;line-height:1;color:#12233a;cursor:pointer;
+    background:rgba(255,255,255,.92);border:1px solid rgba(18,35,58,.16)
+  }
+  .mclose:hover{background:#12233a;border-color:#12233a;color:#fff}
+  .mscroll{flex:1;min-height:0;overflow-y:auto;padding:26px 30px 34px}
+  .mhead{display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap;padding-right:56px}
+  .mhead h2{margin:0;font-size:23px;font-weight:800;letter-spacing:.4px;color:#12233a}
+  /* 右侧竖向页签栏：复用页面 .rail 的蓝底 / 白字 / 金色选中 */
+  .mpanel .mrail{
+    position:absolute;right:16px;top:70px;bottom:16px;width:78px;z-index:5;
+    display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;
+    border-radius:18px;border:1px solid rgba(255,255,255,.26);
+    background:#7E9FCB;backdrop-filter:blur(12px);
+    box-shadow:0 16px 40px rgba(16,32,54,.22)
+  }
+  .mrail-item{
+    width:60px;padding:10px 0;border:0;border-radius:12px;background:transparent;cursor:pointer;
+    font-family:inherit;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.92);
+    transition:background .18s,color .18s
+  }
+  .mrail-item:hover{background:rgba(255,255,255,.18);color:#fff}
+  .mrail-item.on{
+    color:#0b0d13;background:linear-gradient(135deg,#ffe08a,#ffb04d);
+    box-shadow:0 8px 20px rgba(30,55,88,.28)
+  }
+  /* 标签窗口固定 5 字宽，超出自动横向滚动 */
+  .mrail-in{display:block;width:5em;margin:0 auto;overflow:hidden;text-align:center}
+  .mrail-txt{display:inline-block;white-space:nowrap;vertical-align:top}
+  .mrail-item.scroll .mrail-in{text-align:left}
+  .mrail-item.scroll .mrail-txt{animation:mrailMarquee 5s linear infinite alternate}
+  .mrail-item.scroll:hover .mrail-txt{animation-play-state:paused}
+  @keyframes mrailMarquee{
+    0%,12%{transform:translateX(0)}
+    88%,100%{transform:translateX(calc(5em - 100%))}
+  }
+  /* 列表页有右侧页签栏时，内容左侧让位 */
+  .mpanel.has-rail .mscroll{padding-right:112px}
+  .mrule{height:1px;background:rgba(18,35,58,.1);margin:14px 0 20px}
+  .mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;max-width:1320px}
+  .mcard{
+    position:relative;display:flex;flex-direction:column;min-width:0;padding:0;overflow:hidden;
+    aspect-ratio:512/330;font-family:inherit;text-align:left;cursor:pointer;background:#fff;
+    border:1px solid rgba(23,43,73,.12);transition:transform .22s,box-shadow .22s,border-color .22s
+  }
+  .mcard:hover{transform:translateY(-4px);border-color:rgba(23,43,73,.3);box-shadow:0 18px 36px rgba(23,43,73,.24)}
+  .mcov{position:relative;flex:1;min-height:0;overflow:hidden;display:block}
+  .mcov .mau{position:absolute;left:14px;top:12px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:rgba(18,35,58,.72)}
+  .mcov .mau svg{width:11px;height:11px}
+  .mcov .mpl{position:absolute;right:14px;top:11px;display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:#FF4D8D}
+  .mcov .mpl svg{width:14px;height:14px}
+  .mcov .mico{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:46px;opacity:.92;filter:drop-shadow(0 8px 16px rgba(23,43,73,.2))}
+  .mcov .mtg{
+    position:absolute;left:14px;bottom:12px;font-size:10.5px;font-weight:600;color:rgba(18,35,58,.72);
+    padding:2px 7px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.78)
+  }
+  .mnm{
+    flex:0 0 auto;height:34px;display:flex;align-items:center;padding:0 12px;background:rgba(255,255,255,.96);
+    border-top:1px solid rgba(23,43,73,.08);font-size:14px;font-weight:700;letter-spacing:.3px;color:#12233a;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  /* 玩法详情页（示意） */
+  .mdwrap{display:flex;flex-direction:column;gap:16px;min-height:100%}
+  .mdcov{position:relative;height:min(44vh,420px);min-height:200px;overflow:hidden;border:1px solid rgba(23,43,73,.12)}
+  .mdcov .mdico{position:absolute;right:7%;top:50%;transform:translateY(-50%);font-size:96px;opacity:.95;filter:drop-shadow(0 16px 30px rgba(23,43,73,.25))}
+  .mdcov .mdplay{position:absolute;right:22px;top:18px;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#FF4D8D}
+  .mdcov .mdplay svg{width:18px;height:18px}
+  .mdcov .mdtag{
+    position:absolute;left:22px;bottom:18px;font-size:12px;font-weight:600;color:rgba(18,35,58,.75);
+    padding:3px 10px;background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.8)
+  }
+  .mdinfo{padding:0 2px}
+  .mdinfo h2{margin:0 0 8px;font-size:26px;letter-spacing:.5px;color:#12233a}
+  .mdinfo h2 .mdver{font-style:normal;font-size:12px;font-weight:700;letter-spacing:0;color:#5A7290;
+    vertical-align:2px}
+  .mdmeta{display:flex;align-items:center;gap:12px;font-size:12.5px;color:rgba(18,35,58,.6)}
+  .mdmeta .mdau{display:flex;align-items:center;gap:5px;font-weight:600}
+  .mdmeta .mdau svg{width:12px;height:12px}
+  .mdnote{
+    margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.6px;color:#8A5B12;
+    padding:9px 12px;border:1px dashed rgba(160,120,40,.45);background:rgba(255,205,120,.16)
+  }
+  .mddesc{margin:12px 0 0;font-size:13px;line-height:1.85;color:rgba(18,35,58,.62);max-width:760px}
+  .mline{height:10px;margin-top:10px;background:rgba(18,35,58,.07)}
+  /* 作者客态主页（示意） */
+  .mauwrap{max-width:1180px}
+  .mau-top{display:flex;align-items:center;gap:18px;padding-right:56px}
+  .mau-ava{width:78px;height:78px;display:grid;place-items:center;font-size:36px;border:1px solid rgba(23,43,73,.14)}
+  .mau-txt h2{margin:0;font-size:26px;letter-spacing:.4px;color:#12233a}
+  .mau-sub{margin-top:7px;font-size:13px;color:rgba(18,35,58,.6)}
+  .maugrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:22px}
+  .mau-card{display:flex;flex-direction:column;background:#fff;border:1px solid rgba(23,43,73,.12);overflow:hidden}
+  .mau-ph{height:118px;display:grid;place-items:center;font-size:40px;opacity:.95}
+  .mau-nm{
+    height:32px;display:flex;align-items:center;padding:0 10px;font-size:12.5px;font-weight:600;color:#12233a;
+    border-top:1px solid rgba(23,43,73,.08);white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport">
+  <div class="stage" id="stage" data-view="coop">
+
+    <!-- App Bar -->
+    <header class="appbar">
+      <div class="brand"><span class="brand-mark">◆</span><span>绿洲启元</span></div>
+    </header>
+
+    <div class="view view-coop" id="viewCoop">
+
+    <div class="row-top">
+      <!-- ① Banner -->
+      <div class="col-l">
+        <h3 class="col-title">每日精选</h3>
+        <section class="card banner" data-anno="主推 Banner">
+          <div class="anno-chip">1</div>
+          <div class="banner-track" id="bannerTrack"></div>
+          <div class="banner-ui">
+            <div class="dots" id="bannerDots"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ② 热玩趋势 / 创作之星 / 鉴赏专栏 -->
+      <section class="trends">
+        <div class="trends-grid">
+          <!-- 热玩趋势 -->
+          <article class="sub hot" data-anno="热玩趋势">
+            <div class="anno-tag">热玩趋势</div>
+            <div class="sub-label">
+              <div class="hot-theme" id="hotTheme"></div>
+              <span class="mini-dots" id="hotDots"></span>
+            </div>
+            <div class="fade-wrap" id="hotWrap"></div>
+          </article>
+
+          <!-- 创作之星 -->
+          <article class="sub star" data-anno="创作之星">
+            <div class="anno-tag">创作之星</div>
+            <div class="sub-label">
+              <span class="sub-name">本周最佳创意</span>
+              <button class="sub-more" type="button">查看完整名单</button>
+              <div class="mini-dots" id="starDots"></div>
+            </div>
+            <div class="fade-wrap" id="starWrap" style="margin-top:2px"></div>
+          </article>
+
+          <!-- 鉴赏专栏 -->
+          <article class="sub review" data-anno="鉴赏专栏">
+            <div class="anno-tag">鉴赏专栏</div>
+            <div class="review-cover" id="revCover">
+              <div class="cover-art" id="revArt">🌃</div>
+              <div class="review-author" id="revAuthor"></div>
+              <div class="cover-stat" id="revStat"></div>
+              <div class="review-map">
+                <span id="revMap">雨夜霓虹城</span>
+              </div>
+            </div>
+            <div class="review-inner">
+              <div class="review-who">
+                <span class="dotav" id="revAva">🎬</span><span id="revName">鉴赏家 · 老陈</span>
+                <div class="mini-dots" id="revDots"></div>
+              </div>
+              <div class="review-quote" id="revQuote"></div>
+              <div class="review-foot">
+                <span id="revLikes" class="k">♡ 2.4 万</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <!-- ③ 大家都在玩 -->
+    <section class="playing" data-anno="大家都在玩">
+      <div class="anno-chip">3</div>
+      <div class="sec-head">
+        <h3>大家都在玩</h3>
+        <span class="sub-t">按近 24 小时开玩人数排序</span>
+      </div>
+      <div class="games" id="games"></div>
+    </section>
+
+    </div><!-- /共创视图 -->
+
+    <!-- 工坊视图（与共创同级，同一页面内切换） -->
+    <section class="view view-workshop" id="viewWorkshop">
+      <div class="wk-panel">
+        <div class="wk-head">
+          <div class="wk-segs" id="wkSegs">
+            <button class="wk-seg on" type="button" data-seg="all">全部</button>
+            <button class="wk-seg" type="button" data-seg="rsv">我的预约</button>
+          </div>
+          <div class="wk-meta" id="wkMeta"></div>
+        </div>
+        <div class="wk-bar" id="wkBar">
+          <span class="wk-b w-all"><em>当前已获得内测资格玩法数</em><b id="wkA">0</b><i>/ 10</i></span>
+          <span class="wk-b jn w-all"><em>，其中</em><b id="wkB">0</b><em>个玩法已参与</em></span>
+          <span class="wk-b jn w-all"><em>，剩余玩法额度</em><b id="wkLeft">5</b></span>
+          <span class="wk-qwrap w-all">
+            <button class="wk-q" type="button" id="wkQ" aria-label="查看抢先体验名额规则" aria-expanded="false" aria-controls="wkPop">?</button>
+            <div class="wk-pop" id="wkPop" role="dialog" aria-label="抢先体验名额规则">
+              <h4>抢先体验 · 名额规则</h4>
+              <ul>
+                <li>每种玩法独立配额，名额<b>先到先得</b>，抢完即止。</li>
+                <li>点「下载」即占用该玩法 1 个名额，并获得 <b>7 天</b>有效期的内测资格。</li>
+                <li>下载后再点「<b>确定</b>」，该玩法才计为「已参与」。</li>
+                <li>同时持有资格不超过 <b>10 个</b>；「已领未参与」达到 <b>5 个</b>时，需先参与已领玩法才能继续抢。</li>
+                <li>资格过期自动失效并释放名额；正式版预约与内测资格互不影响。</li>
+              </ul>
+            </div>
+          </span>
+          <span class="wk-b-why w-all" id="wkWhy"></span>
+          <span class="w-rsv" id="wkRsvNote">已预约玩法上架正式版后，将收到相关提醒，并将允许其在WiFi网络下自动下载/更新（可在我的库中手动取消）；上架正式版超过 7 天后，将会自动从我的预约列表移除</span>
+          <button class="wk-reset" type="button" id="wkReset">重置演示</button>
+        </div>
+        <div class="wk-pane on" id="wkPaneEarly">
+          <div class="wk-grid" id="wkGrid"></div>
+          <div class="wk-pfoot" id="wkFoot">
+            <button class="wk-fb" type="button" id="wkFb">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.4 12.2c0 3.8-3.8 6.9-8.4 6.9-1 0-1.9-.1-2.8-.4l-4.4 2 1.1-3.2c-1.3-1.3-2.1-3-2.1-5.3 0-3.8 3.8-6.9 8.4-6.9s8.4 3.1 8.4 6.9z"/>
+                <path d="M12 8.8v4.1"/>
+                <circle cx="12" cy="15.5" r=".85" fill="currentColor" stroke="none"/>
+              </svg>我要反馈
+            </button>
+            <p class="wk-note">玩法为抢先体验版本，不代表最终品质</p>
+          </div>
+        </div>
+        <div class="wk-pane" id="wkPanePh">
+          <div class="wk-ph">
+            <span class="wk-phi">🧩</span>
+            <p class="wk-pht" id="wkPhTitle">「精选」页面位置预留</p>
+            <p class="wk-phd">本期仅示意页签位置，暂不提供对应页面</p>
+            <span class="wk-phtag">PLACEHOLDER</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右侧页签栏 -->
+
+    <nav class="rail" id="rail">
+      <button class="rail-item on"><span>热门</span></button>
+      <button class="rail-item"><span>发现</span></button>
+      <button class="rail-item"><span>精选</span></button>
+      <button class="rail-item"><span>我的</span></button>
+    </nav>
+
+    <!-- 工坊的子页签（切到工坊时替换右侧「热门 / 发现 / 精选 / 我的」） -->
+    <nav class="rail rail-w" id="railW">
+      <button class="rail-item" type="button" data-tab="pick">精选</button>
+      <button class="rail-item" type="button" data-tab="rec">推荐</button>
+      <button class="rail-item" type="button" data-tab="new">上新专区</button>
+      <div class="rail-sep"></div>
+      <button class="rail-item on" type="button" data-tab="early">抢先体验</button>
+    </nav>
+
+    <div class="wk-toast" id="wkToast"></div>
+
+    <!-- 一级页签栏（层级更高） -->
+    <nav class="rail2" id="rail2">
+      <button class="rail2-item" data-view="workshop"><span class="ri2">🛠️</span><span>工坊</span></button>
+      <div class="rail2-sep"></div>
+      <button class="rail2-item on" data-view="coop"><span class="ri2">🤝</span><span>共创</span></button>
+      <div class="rail2-sep"></div>
+      <button class="rail2-item"><span class="ri2">👤</span><span>个人</span></button>
+    </nav>
+
+  </div>
+</div>
+
+<div class="legend">
+  <span><b>①</b>主推 Banner：单张轮播，视觉锚点</span>
+  <span><b>②</b>趋势三宫格：2 上 1 下 → 错落分栏，信息分层</span>
+  <span><b>③</b>大家都在玩：4 列网格，横向扫视，一屏 8 个</span>
+</div>
+<button class="toggle" id="toggleAnno">显示布局说明</button>
+
+<style>
+  /* 微调 */
+  .star,.hot{display:flex;flex-direction:column}
+  .trends{position:relative}
+  .trends .anno-chip{left:-2px;top:-2px}
+  /* ---------- 工坊视图（与共创同级，同一页面内切换） ---------- */
+  .view{display:none;position:relative;min-height:0}
+  .view-coop{flex:1;flex-direction:column;gap:14px}
+  .view-workshop{flex:1;flex-direction:column}
+  .stage[data-view="coop"] .view-coop{display:flex}
+  .stage[data-view="workshop"] .view-workshop{display:flex}
+  .stage[data-view="workshop"] #rail{display:none}
+  .stage[data-view="coop"] #railW{display:none}
+
+  .wk-panel{flex:1;min-height:0;padding:11px 12px 10px;display:flex;flex-direction:column;gap:9px;
+    background:linear-gradient(160deg,#F4FAFF,#D8E7F8 62%);box-shadow:0 12px 28px rgba(23,43,73,.16)}
+  .wk-head{flex:0 0 auto;display:flex;align-items:center;gap:10px;min-height:22px}
+  .wk-segs{display:inline-flex;align-items:center;gap:2px;padding:2px;background:rgba(23,43,73,.07);border-radius:9px}
+  .wk-seg{height:20px;padding:0 11px;display:inline-flex;align-items:center;font-family:inherit;font-size:10.5px;
+    font-weight:700;letter-spacing:.3px;color:#5A7290;background:none;border:0;border-radius:7px;cursor:pointer;
+    transition:background .18s,color .18s}
+  .wk-seg:hover{color:#12233a}
+  .wk-seg.on{background:#16304F;color:#fff}
+  .wk-meta{margin-left:auto;font-size:9.5px;color:#5A7290;letter-spacing:.2px;white-space:nowrap}
+  .wk-meta b{color:#3B556F;font-weight:700}
+
+  .wk-pane{flex:1;min-height:0;display:none;flex-direction:column;gap:8px}
+  .wk-pane.on{display:flex}
+
+  .wk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-content:start;
+    width:100%;max-width:936px;margin:0 auto}
+  .wk-card{position:relative;aspect-ratio:700/434;overflow:hidden;cursor:pointer;
+    box-shadow:0 10px 24px rgba(23,43,73,.20);transition:transform .22s ease,box-shadow .22s ease}
+  .wk-card:hover{transform:translateY(-3px);box-shadow:0 18px 36px rgba(23,43,73,.30)}
+  .wk-card::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.075) 0 2px,transparent 2px 15px)}
+  .wk-cov{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(92% 72% at 84% 14%,rgba(255,255,255,.28),transparent 62%),
+      linear-gradient(0deg,rgba(5,10,20,.86) 0%,rgba(5,10,20,.34) 40%,rgba(5,10,20,0) 68%),
+      linear-gradient(180deg,rgba(5,10,20,.34),rgba(5,10,20,0) 30%)}
+  .wk-art{position:absolute;right:15px;top:50%;transform:translateY(-56%);font-size:44px;line-height:1;
+    opacity:.95;filter:drop-shadow(0 8px 16px rgba(0,0,0,.38));pointer-events:none}
+  .wk-heat{position:absolute;left:9px;top:9px;height:19px;padding:0 7px;display:inline-flex;align-items:center;gap:4px;
+    background:rgba(8,14,26,.46);border:1px solid rgba(255,255,255,.26);backdrop-filter:blur(6px)}
+  .wk-heat svg{width:10px;height:10px;display:block;fill:#FFB04D}
+  .wk-heat b{font-size:9.5px;font-weight:800;letter-spacing:.2px;color:#fff}
+  .wk-foot{position:absolute;left:9px;right:9px;bottom:8px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+  .wk-el{min-width:0}
+  .wk-name{margin:0 0 3px;display:flex;align-items:baseline;gap:2px;min-width:0;
+    font-size:12.5px;font-weight:800;letter-spacing:.3px;color:#fff;white-space:nowrap;
+    text-shadow:0 3px 12px rgba(0,0,0,.6)}
+  .wk-name .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wk-name em{flex:0 0 auto;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:0;
+    color:rgba(255,255,255,.84)}
+  .wk-tags{display:flex;align-items:center;font-size:9.5px;letter-spacing:.2px;white-space:nowrap;color:rgba(255,255,255,.9)}
+  .wk-tags em{font-style:normal}
+  .wk-tags i{font-style:normal;margin:0 5px;color:rgba(255,255,255,.42)}
+  .wk-dl{flex:0 0 auto;height:22px;padding:0 10px;display:inline-flex;align-items:center;gap:4px;
+    border:1px solid rgba(255,255,255,.72);background:rgba(255,255,255,.94);color:#12233a;font-family:inherit;
+    font-size:10px;font-weight:800;letter-spacing:.3px;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+  .wk-dl:hover{background:#fff;border-color:#fff}
+  .wk-dl.ok{background:linear-gradient(135deg,#ffe08a,#ffb04d);border-color:#ffd489;color:#3a2a05}
+  .wk-dl.ok:hover{background:linear-gradient(135deg,#ffe9a6,#ffc06a);border-color:#ffc06a}
+  .wk-dl.done{background:rgba(10,18,32,.5);border-color:rgba(255,255,255,.42);color:#fff;cursor:default}
+
+  .wk-pfoot{margin:7px auto 0;width:100%;max-width:936px;display:flex;align-items:center;
+    justify-content:space-between;gap:10px}
+  .wk-fb{display:inline-flex;align-items:center;gap:4px;height:23px;padding:0 9px;border-radius:999px;
+    border:1px solid #DCE3EF;background:#fff;font-family:inherit;font-size:9.5px;font-weight:600;
+    letter-spacing:.2px;color:#4A5A6E;cursor:pointer;white-space:nowrap;
+    transition:border-color .16s,color .16s,background .16s}
+  .wk-fb svg{width:11px;height:11px;display:block;flex:none}
+  .wk-fb:hover{border-color:#9DB2CC;color:#1E2A38;background:#F7FAFF}
+  .wk-fb:active{background:#EDF3FC}
+  .wk-note{margin:0;font-size:9.5px;letter-spacing:.2px;color:#98A6B8;white-space:nowrap}
+  .wk-empty{grid-column:1 / -1;margin:0;padding:44px 0;text-align:center;font-size:10.5px;color:#7B90A6;letter-spacing:.2px}
+
+  .wk-ph{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    border:1px dashed rgba(23,43,73,.26);background:rgba(255,255,255,.32);color:#5A7290}
+  .wk-phi{font-size:24px;opacity:.45;line-height:1}
+  .wk-pht{margin:0;font-size:12.5px;font-weight:700;letter-spacing:.4px;color:#3B556F}
+  .wk-phd{margin:0;font-size:10px;letter-spacing:.2px;color:#5A7290}
+  .wk-phtag{margin-top:3px;height:19px;padding:0 8px;display:inline-flex;align-items:center;font-size:9px;
+    font-weight:700;letter-spacing:.4px;color:#5A7290;border:1px solid rgba(23,43,73,.16);background:rgba(255,255,255,.6)}
+
+  .rail-sep{width:24px;height:1px;margin:3px 0;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent)}
+  .rail-w .rail-item{white-space:nowrap;font-size:10.5px;letter-spacing:0}
+
+  .stage>.wk-toast{position:absolute;left:50%;bottom:26px;transform:translate(-50%,10px);padding:7px 14px;
+    background:rgba(9,16,28,.82);border:1px solid rgba(255,255,255,.18);font-size:10.5px;font-weight:600;
+    letter-spacing:.3px;color:#fff;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}
+  .stage>.wk-toast.on{opacity:1;transform:translate(-50%,0)}
+  /* ---------- 抢先体验：额度条 / 资格状态 / 名额 / 预约 ---------- */
+  .wk-bar{flex:0 0 auto;display:flex;align-items:center;gap:8px;min-height:18px;padding:3px 8px;
+    background:rgba(255,255,255,.55);border:1px solid rgba(23,43,73,.10);font-size:9.5px;letter-spacing:.2px;color:#5A7290}
+  .wk-b{display:inline-flex;align-items:baseline;gap:3px;white-space:nowrap}
+  .wk-b em{font-style:normal;color:#7B90A6}
+  .wk-b b{font-size:11px;font-weight:800;color:#12233a;letter-spacing:0}
+  .wk-b i{font-style:normal;color:#9AACBE}
+  .wk-b.jn{margin-left:-8px}
+  .wk-qwrap{position:relative;display:inline-flex;align-items:center}
+  .wk-q{width:14px;height:14px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:none;
+    font-family:inherit;font-size:9px;font-weight:800;line-height:1;color:#6B7F96;background:#fff;
+    border:1px solid #C7D3E2;border-radius:50%;cursor:pointer;transition:color .16s,border-color .16s,background .16s}
+  .wk-q:hover{color:#12233a;border-color:#8FA6BE;background:#F7FAFF}
+  .wk-pop{position:absolute;top:calc(100% + 7px);left:50%;transform:translate(-50%,-4px);width:308px;padding:10px 12px 11px;
+    background:#fff;border:1px solid rgba(23,43,73,.10);box-shadow:0 14px 34px rgba(23,43,73,.20);
+    display:none;z-index:30}
+  .wk-pop.show{display:block;animation:wkPopIn .18s ease-out both}
+  @keyframes wkPopIn{from{opacity:0;transform:translate(-50%,-4px)}to{opacity:1;transform:translate(-50%,0)}}
+  .wk-pop h4{margin:0 0 6px;font-size:10.5px;font-weight:800;letter-spacing:.3px;color:#12233a}
+  .wk-pop ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+  .wk-pop li{position:relative;padding-left:10px;font-size:9.5px;line-height:1.45;letter-spacing:.1px;color:#5A7290}
+  .wk-pop li::before{content:"";position:absolute;left:2px;top:5px;width:3px;height:3px;border-radius:50%;background:#A9BACB}
+  .wk-pop li b{color:#3B556F;font-weight:800}
+  .wk-bar .w-all{display:inline-flex}
+  .wk-bar.rv .w-all{display:none}
+  .wk-bar .w-rsv{display:none;align-items:center;font-size:9.5px;letter-spacing:.2px;color:#5A7290;white-space:nowrap}
+  .wk-bar.rv .w-rsv{display:inline-flex}
+  .wk-b-why{margin-left:4px;color:#B4573C;font-size:9px;letter-spacing:.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wk-reset{margin-left:auto;height:16px;padding:0 6px;font-family:inherit;font-size:9px;letter-spacing:.2px;
+    color:#5A7290;background:rgba(255,255,255,.8);border:1px solid rgba(23,43,73,.16);cursor:pointer}
+  .wk-reset:hover{color:#12233a;border-color:rgba(23,43,73,.34)}
+
+  .wk-side{position:absolute;right:9px;top:9px;display:flex;flex-direction:column;align-items:flex-end;
+    gap:4px;max-width:66%}
+  .wk-state{height:19px;padding:0 7px;display:inline-flex;align-items:center;max-width:100%;
+    font-size:9.5px;font-weight:800;letter-spacing:.3px;white-space:nowrap;
+    border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(6px)}
+  .wk-card.s-own  .wk-state{background:linear-gradient(135deg,#ffe08a,#ffb04d);border-color:#ffd489;color:#3a2a05}
+  .wk-card.s-full .wk-state{background:rgba(14,20,32,.62);border-color:rgba(255,255,255,.30);color:#E7EDF5}
+  .wk-card.s-open .wk-state{background:rgba(255,255,255,.94);border-color:#fff;color:#12233a}
+  .wk-card.s-lock .wk-state{background:rgba(14,20,32,.44);border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.78)}
+  .wk-card.s-own .wk-state{padding:0 7px}
+  .wk-card.s-own .wk-state em{font-style:normal;font-size:7.5px;font-weight:700;letter-spacing:-.1px;color:#4A3602;opacity:.9}
+
+  .wk-rsv{height:15px;padding:0 5px;display:inline-flex;align-items:center;font-size:8.5px;font-weight:700;
+    letter-spacing:.2px;white-space:nowrap;
+    color:rgba(255,255,255,.9);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.36)}
+
+  .wk-dl.off,.wk-card.s-own .wk-dl.off{background:rgba(10,18,32,.46);border-color:rgba(255,255,255,.3);
+    color:rgba(255,255,255,.72);cursor:not-allowed}
+  .wk-dl.off:hover{background:rgba(10,18,32,.46);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.72)}
+
+  .md-state{height:18px;padding:0 7px;display:inline-flex;align-items:center;font-size:9.5px;font-weight:800;letter-spacing:.3px;
+    border:1px solid rgba(18,35,58,.14);color:#3B556F;background:rgba(18,35,58,.05)}
+  .md-state.own{color:#3a2a05;background:linear-gradient(135deg,#ffe08a,#ffb04d);border-color:#ffd489}
+  .md-state.full{color:#fff;background:#546A85;border-color:#546A85}
+  .md-state.open{color:#0d5c8a;background:rgba(34,211,238,.16);border-color:rgba(34,211,238,.4)}
+  .md-state.lock{color:#8A6A5A;background:rgba(180,87,60,.10);border-color:rgba(180,87,60,.24)}
+  .mdact{margin-top:18px;height:34px;padding:0 20px;font-family:inherit;font-size:12px;font-weight:800;letter-spacing:.4px;
+    color:#12233a;background:#fff;border:1px solid rgba(18,35,58,.22);cursor:pointer}
+  .mdact:hover{background:#F1F5FA}
+  .mdact.off{color:rgba(255,255,255,.7);background:#8A9AAC;border-color:#8A9AAC;cursor:not-allowed}
+  .mdact.ok{color:#3a2a05;background:linear-gradient(135deg,#ffe08a,#ffb04d);border-color:#ffd489}
+  .mdact.ok:hover{background:linear-gradient(135deg,#ffe9a6,#ffc06a);border-color:#ffc06a}
+  .mdacts{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:18px;padding-right:2px}
+  .mdacts .mdact{margin-top:0}
+  .mdact.ghost{color:#3B556F;background:#F1F5FA;border-color:rgba(18,35,58,.14)}
+  .mdact.ghost:hover{background:#E7EEF7}
+  .mdact.ghost.on{color:#8A5A48;background:#FDF7F4;border-color:rgba(180,87,60,.32)}
+  .mdact.ghost.on:hover{background:#FBEFE9}
+</style>
+
+<script>
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+
+/* 固定图标：作者小人 / 粉色游戏手柄 */
+const SVG_USER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+const SVG_PAD  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.4h10.8a5 5 0 0 1 4.7 3.3l1 3c.9 2.6-.6 5.6-3.4 5.6-1.5 0-2.8-.8-3.5-2.1l-.5-1H8.3l-.5 1c-.7 1.3-2 2.1-3.5 2.1-2.8 0-4.3-3-3.4-5.6l1-3a5 5 0 0 1 4.7-3.3z"/><path d="M7.2 10.7v3.2M5.6 12.3h3.2"/><circle cx="16.3" cy="11.1" r=".8" fill="currentColor" stroke="none"/><circle cx="17.5" cy="12.3" r=".8" fill="currentColor" stroke="none"/><circle cx="16.3" cy="13.5" r=".8" fill="currentColor" stroke="none"/><circle cx="15.1" cy="12.3" r=".8" fill="currentColor" stroke="none"/></svg>';
+
+/* ---------------- 数据 ---------------- */
+const banners = [
+  {emoji:'🌌',name:'幻境迷城',author:'星轨工作室',plays:'123.4 万',c1:'#5b4bff',c2:'#22d3ee',
+   tags:['极限逃生','8 人小队','新玩法']},
+  {emoji:'🏝️',name:'孤岛物语',author:'南屿',plays:'86.7 万',c1:'#f97316',c2:'#facc15',
+   tags:['生存建造','沙盒','单人/联机']},
+  {emoji:'⚔️',name:'王座争霸',author:'铁砧竞技',plays:'64.2 万',c1:'#dc2626',c2:'#7c3aed',
+   tags:['多人竞技','4v4','赛季']},
+  {emoji:'🎢',name:'云端过山车',author:'螺丝钉工坊',plays:'45.9 万',c1:'#0ea5e9',c2:'#a855f7',
+   tags:['创意跑酷','物理','一键同玩']},
+  {emoji:'👻',name:'深夜捉迷藏',author:'午夜社',plays:'38.6 万',c1:'#7c3aed',c2:'#db2777',
+   tags:['派对','2-10 人','语音']}
+];
+
+/* 创作者等级：皇冠 > 王牌 > 星钻 */
+const creators = [
+  {name:'一只咸鱼酱',ava:'🐟',rank:'皇冠',fans:'2.3 万',work:'天空之城 · 重建版',wico:'🏰',wtag:'建筑',plays:'46.2 万',c1:'#22d3ee',c2:'#3b82f6'},
+  {name:'雾里看花',ava:'🌫️',rank:'王牌',fans:'1.6 万',work:'镜面迷宫的第七夜',wico:'🪞',wtag:'解谜',plays:'33.8 万',c1:'#a78bfa',c2:'#ec4899'},
+  {name:'阿北的积木',ava:'🧱',rank:'星钻',fans:'3.1 万',followed:true,work:'海上列车 1987',wico:'🚂',wtag:'载具',plays:'28.5 万',c1:'#f59e0b',c2:'#ef4444'},
+  {name:'大橘想吃鱼',ava:'🐱',rank:'王牌',fans:'0.9 万',followed:true,work:'橘子镇捉迷藏',wico:'🍊',wtag:'派对',plays:'21.7 万',c1:'#34d399',c2:'#0ea5e9'}
+];
+
+const reviews = [
+  {map:'雨夜霓虹城',art:'🌃',plays:'52.3 万',author:'霓虹电台',c1:'#7c3aed',c2:'#1d4ed8',critics:[
+    {name:'鉴赏家 · 老陈',ava:'🎬',score:'★★★★★',likes:'♡ 2.4 万',
+     text:'雨幕粒子与霓虹反射处理得极稳，路线引导藏在广告牌里。这是我今年见过最有电影感的跑图设计，值得反复走两遍。'},
+    {name:'鉴赏家 · 阿柚',ava:'🍊',score:'★★★★☆',likes:'♡ 1.9 万',
+     text:'色彩管理很讲究，但雨声音效略盖过环境音，调小一点反而更沉浸。适合深夜一个人慢慢跑完。'},
+    {name:'鉴赏家 · Haze',ava:'🌫️',score:'★★★★★',likes:'♡ 1.3 万',
+     text:'真正厉害的是它把叙事藏进了城市本身：路牌、广告、积水里的倒影都在说同一件事。美术党必看。'}
+  ]},
+  {map:'蜂蜜色的夏天',art:'🌻',plays:'31.8 万',author:'蜂蜜罐头',c1:'#f59e0b',c2:'#fb923c',critics:[
+    {name:'鉴赏家 · 阿柚',ava:'🍊',score:'★★★★☆',likes:'♡ 1.8 万',
+     text:'色彩克制、叙事也克制。走到结尾那棵树下时确实愣了一下。缺点是中段节奏略拖，跑图动线可以再收一收。'},
+    {name:'鉴赏家 · 小满',ava:'🌾',score:'★★★★★',likes:'♡ 1.1 万',
+     text:'它没有做任何炫技，却让人想在下班后进去坐一会儿。这类"低强度治愈图"其实最难做好。'}
+  ]},
+  {map:'第九号档案室',art:'🗄️',plays:'27.4 万',author:'尘封档案局',c1:'#0ea5e9',c2:'#14b8a6',critics:[
+    {name:'鉴赏家 · Haze',ava:'🌫️',score:'★★★★★',likes:'♡ 3.1 万',
+     text:'解谜逻辑闭环非常干净，没有一处靠猜。音效设计是隐藏主角，建议戴耳机、调暗房间，再一个人进去。'},
+    {name:'鉴赏家 · 老陈',ava:'🎬',score:'★★★★☆',likes:'♡ 2.2 万',
+     text:'纸档与灯管的材质做得很旧，旧得刚好。唯一想挑的是第三个房间线索密度过高，容易卡住新手。'},
+    {name:'鉴赏家 · 阿柚',ava:'🍊',score:'★★★★★',likes:'♡ 9,800',
+     text:'结尾那次"档案归位"的交互设计太聪明了，不靠文字就把全部信息交代清楚。属于会想截图分享的那种。'}
+  ]},
+  {map:'玻璃海车站',art:'🚉',plays:'19.6 万',author:'海雾工作室',c1:'#64748b',c2:'#38bdf8',critics:[
+    {name:'鉴赏家 · 小满',ava:'🌾',score:'★★★★☆',likes:'♡ 1.2 万',
+     text:'用一趟永远开不走的列车讲完了一个告别的故事。空间尺度偏大，空旷反而成了它最准确的表达。'},
+    {name:'鉴赏家 · Haze',ava:'🌫️',score:'★★★★☆',likes:'♡ 8,600',
+     text:'氛围一流，但动线引导偏弱，第一次进容易在原地打转。建议跟着地上的积水走，那是唯一的提示。'}
+  ]}
+];
+
+const games = [
+  {name:'幻境迷城',tag:'极限逃生',author:'星轨工作室',emoji:'🌀',players:'12.8 万',c1:'#CFE0FF',c2:'#E4F4FF'},
+  {name:'王座争霸',tag:'4v4 竞技',author:'铁砧竞技',emoji:'⚔️',players:'9.4 万',c1:'#FFDCD9',c2:'#EADFFF'},
+  {name:'云端过山车',tag:'创意跑酷',author:'螺丝钉工坊',emoji:'🎢',players:'7.2 万',c1:'#D8ECFF',c2:'#EBDEFF'},
+  {name:'深夜捉迷藏',tag:'社交派对',author:'午夜社',emoji:'👻',players:'6.8 万',c1:'#E6DBFF',c2:'#FFE1F0'},
+  {name:'糖果工厂',tag:'建造经营',author:'糖纸小组',emoji:'🍬',players:'5.9 万',c1:'#FFE2F2',c2:'#FFF1D8'},
+  {name:'深海回声',tag:'氛围解谜',author:'蓝鲸实验室',emoji:'🌊',players:'5.1 万',c1:'#D6F1EC',c2:'#DEE8FF'},
+  {name:'极速卡丁',tag:'竞速',author:'四号车库',emoji:'🏎️',players:'4.7 万',c1:'#FFE5D4',c2:'#FFF5D9'},
+  {name:'森林小屋',tag:'生存',author:'木屋小队',emoji:'🌲',players:'4.2 万',c1:'#DEF1DA',c2:'#D9F2EC'}
+];
+
+/* ---------------- 工具 ---------------- */
+function loop(el, fn, ms){
+  let t = null;
+  const start = () => { clear(); t = setInterval(fn, ms); };
+  const clear = () => { if(t) clearInterval(t); t = null; };
+  if(el){ el.addEventListener('mouseenter', clear); el.addEventListener('mouseleave', start); }
+  start();
+  return {start, clear};
+}
+/* ---------------- ① Banner 轮播 ---------------- */
+(function mountBanner(){
+  const track = $('#bannerTrack'), dots = $('#bannerDots');
+  track.innerHTML = banners.map((b,i)=>`
+    <div class="slide${i===0?' on':''}">
+      <div class="slide-bg" style="background:linear-gradient(115deg,${b.c1},${b.c2})"></div>
+      <div class="slide-ring"></div>
+      <div class="slide-art">${b.emoji}</div>
+      <div class="slide-author"><span class="auico">${SVG_USER}</span>${b.author}</div>
+      <div class="slide-plays">${SVG_PAD}${b.plays}</div>
+      <div class="slide-body">
+        <h2>${b.name}</h2>
+        <div class="slide-tags">${b.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+  dots.innerHTML = banners.map((_,i)=>`<button class="dot${i===0?' on':''}" data-i="${i}" aria-label="第${i+1}张"></button>`).join('');
+
+  const slides = $$('.slide', track);
+  const dts = $$('.dot', dots);
+  let cur = 0;
+
+  function show(i){
+    cur = (i + slides.length) % slides.length;
+    slides.forEach((s,k)=>s.classList.toggle('on', k===cur));
+    dts.forEach((d,k)=>d.classList.toggle('on', k===cur));
+  }
+  const timer = loop($('.banner'), ()=>show(cur+1), 5000);
+  dots.addEventListener('click', e => {
+    const d = e.target.closest('.dot');
+    if(!d) return;
+    show(+d.dataset.i);
+    timer.start();
+  });
+  show(0);
+})();
+
+/* ---------------- ②-0 热玩趋势（主题轮播） ---------------- */
+const hotTopics = [
+  {theme:'荒岛生存', count:3, heat:'29.2 万', cards:[
+    {name:'孤岛物语', wico:'🏝️', wtag:'生存', plays:'12.6 万', c1:'#22d3ee', c2:'#3b82f6'},
+    {name:'荒岛 100 天', wico:'🌴', wtag:'生存', plays:'9.4 万', c1:'#34d399', c2:'#0ea5e9'},
+    {name:'野蛮生长', wico:'🪵', wtag:'生存', plays:'7.2 万', c1:'#4ade80', c2:'#0f766e'}
+  ]},
+  {theme:'极限逃脱', count:4, heat:'36.9 万', cards:[
+    {name:'幻境迷城', wico:'🌀', wtag:'逃脱', plays:'15.2 万', c1:'#a78bfa', c2:'#ec4899'},
+    {name:'坠落 30 秒', wico:'🪂', wtag:'逃脱', plays:'11.8 万', c1:'#f472b6', c2:'#8b5cf6'},
+    {name:'最后一班地铁', wico:'🚇', wtag:'逃脱', plays:'9.9 万', c1:'#818cf8', c2:'#6366f1'}
+  ]},
+  {theme:'建筑创意', count:3, heat:'39.9 万', cards:[
+    {name:'天空之城', wico:'🏯', wtag:'建筑', plays:'18.7 万', c1:'#f59e0b', c2:'#ef4444'},
+    {name:'云顶温泉旅馆', wico:'♨️', wtag:'建筑', plays:'8.9 万', c1:'#fbbf24', c2:'#f97316'},
+    {name:'海上列车', wico:'🚄', wtag:'建筑', plays:'12.3 万', c1:'#fcd34d', c2:'#f59e0b'}
+  ]},
+  {theme:'派对社交', count:3, heat:'32.1 万', cards:[
+    {name:'深夜捉迷藏', wico:'🌙', wtag:'派对', plays:'13.4 万', c1:'#34d399', c2:'#0ea5e9'},
+    {name:'橘子镇', wico:'🍊', wtag:'派对', plays:'10.1 万', c1:'#22d3ee', c2:'#3b82f6'},
+    {name:'谁在影子里', wico:'👤', wtag:'派对', plays:'8.6 万', c1:'#38bdf8', c2:'#0ea5e9'}
+  ]}
+];
+(function mountHot(){
+  const wrap = $('#hotWrap'), dots = $('#hotDots'), themeEl = $('#hotTheme');
+  const themeHTML = t => `<i class="hash">#</i><span class="ht-name">${t.theme}</span>`
+    + `<span class="heat">热度 ${t.heat}</span><button class="hot-more" type="button">查看详情</button>`;
+  themeEl.innerHTML = themeHTML(hotTopics[0]);
+  const cardHTML = m => `
+        <div class="wk" style="background:linear-gradient(135deg,${m.c1},${m.c2})">
+          <div class="wico">${m.wico}</div>
+          <div class="wstat">${SVG_PAD}${m.plays}</div>
+          <div class="wmeta">
+            <div class="wt">${m.name}</div>
+          </div>
+        </div>`;
+  wrap.innerHTML = hotTopics.map((t,i)=>{
+    /* 两组相同卡片首尾相接，translateX(-50%) 时无缝衔接 */
+    const group = `<div class="hot-group">${t.cards.map(cardHTML).join('')}</div>`;
+    return `
+    <div class="fade-item${i===0?' on':''}">
+      <div class="hot-cards">
+        <div class="hot-track">${group}${group.replace('hot-group','hot-group" aria-hidden="true')}</div>
+      </div>
+    </div>`;
+  }).join('');
+  dots.innerHTML = hotTopics.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');
+  const items = $$('.fade-item', wrap);
+  const dts = $$('i', dots);
+  let cur = 0;
+  function show(i){
+    cur = (i + items.length) % items.length;
+    items.forEach((el,k)=>el.classList.toggle('on', k===cur));
+    dts.forEach((d,k)=>d.classList.toggle('on', k===cur));
+    themeEl.innerHTML = themeHTML(hotTopics[cur]);
+  }
+  /* 点击：查看详情 → 玩法列表；单张玩法卡 → 玩法详情 */
+  $$('.fade-item', wrap).forEach((it, ti)=>{
+    $$('.wk', it).forEach((wk, ci)=>{
+      wk._game = hotTopics[ti].cards[ci % hotTopics[ti].cards.length];
+      wk.style.cursor = 'pointer';
+    });
+  });
+  /* 点击：单张玩法卡 → 玩法详情；其余区域（主题栏 / 热度 / 查看详情 / 轮播点 / 空白处）→ 完整列表 */
+  $('.sub.hot').addEventListener('click', e=>{
+    const wk = e.target.closest('.wk');
+    if(wk){ if(wk._game) OU_openGame(wk._game); return; }
+    OU_openList(cur);
+  });
+  loop($('.hot'), ()=>show(cur+1), 12000);   // 话题切换 12s
+})();
+
+/* ---------------- ②-1 每周创作之星 ---------------- */
+(function mountStar(){
+  const wrap = $('#starWrap'), dots = $('#starDots');
+  /* 每页一位作者：单行展示，逐位切换 */
+  const pages = creators.map(c => [c]);
+  wrap.innerHTML = pages.map((grp, pi)=>`
+    <div class="fade-item${pi===0?' on':''}">
+      ${grp.map(c=>`
+      <div class="star-body">
+        <div class="star-face" style="background:linear-gradient(135deg,${c.c1},${c.c2})">${c.ava}</div>
+        <div class="star-info">
+          <div class="star-name">${c.name}</div>
+          <button class="star-follow${c.followed?' on':''}" type="button" aria-pressed="${c.followed?'true':'false'}">${c.followed?'已关注':'关注'}</button>
+        </div>
+        <div class="wk star-work" style="background:linear-gradient(135deg,${c.c1},${c.c2})">
+          <div class="wico">${c.wico}</div>
+          <div class="wstat">${SVG_PAD}${c.plays}</div>
+          <div class="wmeta">
+            <div class="wt">${c.work}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>`).join('');
+  dots.innerHTML = pages.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');
+
+  const items = $$('.fade-item', wrap);
+  const dts = $$('i', dots);
+  let cur = 0;
+  function show(i){
+    cur = (i + items.length) % items.length;
+    items.forEach((el,k)=>el.classList.toggle('on', k===cur));
+    dts.forEach((d,k)=>d.classList.toggle('on', k===cur));
+  }
+  /* 点击：头像/昵称 → 作者客态主页；作品卡 → 玩法详情 */
+  $$('.star-body', wrap).forEach((it, ci)=>{
+    const c = creators[ci];
+    if(!c) return;
+    const face = $('.star-face', it), info = $('.star-info', it), work = $('.star-work', it), fol = $('.star-follow', it);
+    if(work){
+      work._game = {name:c.work, wico:c.wico, wtag:c.wtag, plays:c.plays, author:c.name, c1:c.c1, c2:c.c2};
+      work.style.cursor = 'pointer';
+    }
+    if(fol) fol._author = c;
+    [face, info].forEach(el=>{
+      if(!el) return;
+      el._author = c;
+      el.style.cursor = 'pointer';
+    });
+  });
+  wrap.addEventListener('click', e=>{
+    const fol = e.target.closest('.star-follow');
+    if(fol){
+      const cf = fol._author;
+      if(cf){
+        cf.followed = !cf.followed;
+        fol.classList.toggle('on', !!cf.followed);
+        fol.textContent = cf.followed ? '已关注' : '关注';
+        fol.setAttribute('aria-pressed', String(!!cf.followed));
+      }
+      return;
+    }
+    const work = e.target.closest('.star-work');
+    if(work && work._game){ OU_openGame(work._game); return; }
+    const who = e.target.closest('.star-face, .star-info');
+    if(who && who._author) OU_openAuthor(who._author);
+  });
+  /* 完整榜单 → 全屏榜单弹窗 */
+  const moreBtn = $('.star .sub-more');
+  if(moreBtn) moreBtn.addEventListener('click', OU_openRank);
+  loop($('.star'), ()=>show(cur+1), 7000);   // 创作之星切换 7s
+})();
+
+/* ---------------- ②-3 鉴赏专栏（玩法 × 鉴赏家 双层轮播） ---------------- */
+(function mountReview(){
+  const cover = $('#revCover'), art = $('#revArt');
+  const map = $('#revMap'), name = $('#revName');
+  const ava = $('#revAva'), quote = $('#revQuote'), likes = $('#revLikes'), dots = $('#revDots');
+  const stat = $('#revStat'), author = $('#revAuthor');
+  let mi = 0, ci = 0;
+
+  /* 评语位：同一玩法内上下切换 */
+  function paintDots(){
+    dots.innerHTML = reviews[mi].critics.map((_,k)=>`<i class="${k===ci?'on':''}"></i>`).join('');
+  }
+  function paintCritic(){
+    const m = reviews[mi], c = m.critics[ci];
+    /* 评语位不允许为空：缺字段时回退到同玩法其他评语，再兜底 */
+    const text = (c.text || '').trim()
+      || m.critics.map(x => (x.text || '').trim()).find(Boolean)
+      || '这段玩法还没等到评语，先自己进去走一遍吧。';
+    name.textContent = c.name;
+    ava.textContent = c.ava;
+    quote.textContent = text;
+    likes.textContent = c.likes;
+    paintDots();
+  }
+  function paintMap(){
+    const m = reviews[mi];
+    cover.style.background = `linear-gradient(140deg, ${m.c1}, ${m.c2})`;
+    art.textContent = m.art;
+    map.textContent = m.map;
+    stat.innerHTML = SVG_PAD + `<span>${m.plays}</span>`;
+    author.innerHTML = SVG_USER + `<span>${m.author}</span>`;
+    paintCritic();
+  }
+
+  /* 竖向滑动切换：先写内容再淡入，任何时刻评语都不为空 */
+  function slideQuote(dir, done){
+    quote.style.transition = 'none';
+    quote.style.opacity = '.45';   // 只做浅淡过渡，避免整行看起来是空的
+    quote.style.transform = `translateY(${dir > 0 ? 10 : -10}px)`;
+    done();                        // 内容同步落位，不依赖动画回调
+    void quote.offsetWidth;        // 强制回流，使下面这次变化产生过渡
+    quote.style.transition = '';
+    quote.style.opacity = '1';
+    quote.style.transform = 'translateY(0)';
+  }
+
+  /* 评语每 3s 换一位；走完最后一位就停住，等 10s 到点换玩法 */
+  function nextCritic(){
+    if(ci >= reviews[mi].critics.length - 1) return;
+    ci += 1;
+    slideQuote(1, paintCritic);
+  }
+  function nextMap(){
+    mi = (mi + 1) % reviews.length;
+    ci = 0;
+    slideQuote(1, paintMap);
+    criticTimer.start();      // 换玩法后，新玩法的第一条评语重新计满 3s
+  }
+
+  paintMap();
+  const criticTimer = loop($('.review'), nextCritic, 3000);   // 评语 3s
+  const mapTimer = loop($('.review'), nextMap, 10000);        // 玩法 10s
+  /* 点击卡片任意位置：打开当前玩法的详情页（示意） */
+  $('.review').style.cursor = 'pointer';
+  $('.review').addEventListener('click', ()=>{
+    const m = reviews[mi];
+    OU_openGame({name:m.map, wico:m.art, wtag:'鉴赏推荐', plays:m.plays, author:m.author, c1:m.c1, c2:m.c2});
+  });
+})();
+
+/* ---------------- ③ 大家都在玩 ---------------- */
+$('#games').innerHTML = games.map(g=>`
+  <div class="game">
+    <div class="gcover" style="background:linear-gradient(115deg,${g.c1},${g.c2})">
+      <span class="gauthor">${SVG_USER}${g.author}</span>
+      <span class="gstat">${SVG_PAD}${g.players}</span>
+      <span class="gico">${g.emoji}</span>
+      <span class="gtag">${g.tag}</span>
+    </div>
+    <div class="gname"><span class="gn">${g.name}</span></div>
+  </div>`).join('');
+
+
+/* ---------------- 弹窗：玩法列表 / 玩法详情 / 作者客态主页 ---------------- */
+const OUModal = (function(){
+  const layer = document.createElement('div');
+  layer.className = 'mlayer';
+  layer.setAttribute('aria-hidden','true');
+  layer.innerHTML = `
+    <div class="mscrim" data-close></div>
+    <div class="mpanel" role="dialog" aria-modal="true">
+      <button class="mclose" type="button" data-close aria-label="关闭">✕</button>
+      <div class="mscroll" id="ouScroll"></div>
+    </div>`;
+  (document.getElementById('stage') || document.body).appendChild(layer);
+  const panel = $('.mpanel', layer), scroll = $('#ouScroll', layer);
+  let opened = false;
+
+  function show(size, html, rail){
+    layer.className = 'mlayer show ' + size;
+    scroll.innerHTML = html;
+    panel.classList.toggle('has-rail', !!rail);
+    panel.querySelectorAll('.mrail').forEach(n=>n.remove());
+    if(rail){
+      const nav = document.createElement('nav');
+      nav.className = 'mrail';
+      nav.innerHTML = rail;
+      panel.appendChild(nav);
+    }
+    scroll.scrollTop = 0;
+    layer.setAttribute('aria-hidden','false');
+    opened = true;
+  }
+  function close(){
+    opened = false;
+    layer.className = 'mlayer';
+    layer.setAttribute('aria-hidden','true');
+  }
+  layer.addEventListener('click', e=>{
+    if(e.target.closest('[data-close]')){ close(); return; }
+    const tab = e.target.closest('.mrail-item');
+    if(tab){ OU_switchTab(+tab.dataset.tab); return; }
+    const card = e.target.closest('.mcard');
+    if(!card) return;
+    if(card.dataset.g){
+      try{ OU_openGame(JSON.parse(decodeURIComponent(card.dataset.g))); }catch(err){}
+    }else if(card.dataset.au){
+      try{ OU_openAuthor(JSON.parse(decodeURIComponent(card.dataset.au))); }catch(err){}
+    }
+  });
+  addEventListener('keydown', e=>{ if(e.key === 'Escape' && opened) close(); });
+  /* 遮罩上滚轮不再带动背后页面滚动 */
+  layer.addEventListener('wheel', e=>{ if(!e.target.closest('.mscroll')) e.preventDefault(); }, {passive:false});
+  return {show, close};
+})();
+
+function OU_card(g){
+  const data = encodeURIComponent(JSON.stringify(g));
+  return `<button class="mcard" type="button" data-g="${data}">
+    <span class="mcov" style="background:linear-gradient(125deg,${g.c1},${g.c2})">
+      <span class="mau">${SVG_USER}${g.author || '热门玩法'}</span>
+      <span class="mpl">${SVG_PAD}${g.plays}</span>
+      <span class="mico">${g.wico || g.emoji || '🎮'}</span>
+      <span class="mtg">${g.wtag || g.tag || '玩法'}</span>
+    </span>
+    <span class="mnm">${g.name}</span>
+  </button>`;
+}
+/* 话题玩法 + 全站热门补足，凑满三行九张 */
+function OU_hotCards(t){
+  const base = t.cards.map(m=>({name:m.name, wico:m.wico, wtag:m.wtag, plays:m.plays, author:'热门玩法', c1:m.c1, c2:m.c2}));
+  const more = games
+    .filter(g => !base.some(b => b.name === g.name))
+    .slice(0, Math.max(0, 9 - base.length))
+    .map(g=>({name:g.name, wico:g.emoji, wtag:g.tag, plays:g.players, author:g.author, c1:g.c1, c2:g.c2}));
+  return base.concat(more);
+}
+/* ---------------- 列表页视图：标题 + 右侧话题页签 + 三列卡片网格 ---------------- */
+let OU_cur = null;   /* 当前列表页视图：{tabs, active, build(i) -> {title, cardsHTML}} */
+function OU_railHTML(tabs, active){
+  return tabs.map((label, i)=>
+    `<button class="mrail-item${i === active ? ' on' : ''}" type="button" data-tab="${i}" title="${label}"><span class="mrail-in"><span class="mrail-txt">${label}</span></span></button>`
+  ).join('');
+}
+/* 文案比 5 字窗口宽时启用滚动 */
+function OU_fitTabs(){
+  document.querySelectorAll('.mrail-item').forEach(b=>{
+    const w = b.querySelector('.mrail-in'), t = b.querySelector('.mrail-txt');
+    if(w && t) b.classList.toggle('scroll', t.offsetWidth > w.clientWidth);
+  });
+}
+function OU_openView(view){
+  OU_cur = view;
+  const v = view.build(view.active);
+  OUModal.show('full', `
+    <div class="mhead">
+      <h2>${v.title}</h2>
+    </div>
+    <div class="mrule"></div>
+    <div class="mgrid">${v.cardsHTML}</div>`, OU_railHTML(view.tabs, view.active));
+  OU_fitTabs();
+}
+/* 页签切换：只换标题与网格，弹层不重播入场动画 */
+function OU_switchTab(i){
+  if(!OU_cur || i === OU_cur.active) return;
+  const v = OU_cur.build(i);
+  OU_cur.active = i;
+  const sc = document.querySelector('.mlayer .mscroll');
+  const rail = document.querySelector('.mlayer .mrail');
+  if(!sc || !rail) return;
+  const h2 = sc.querySelector('.mhead h2');
+  if(h2) h2.textContent = v.title;
+  rail.querySelectorAll('.mrail-item').forEach((b, j)=>b.classList.toggle('on', j === i));
+  const grid = sc.querySelector('.mgrid');
+  if(grid) grid.innerHTML = v.cardsHTML;
+  sc.scrollTop = 0;
+  OU_fitTabs();
+}
+/* 热玩趋势 / 创作之星共用一个弹层：右侧页签 = 4 个话题 + 创作之星，入口只决定默认选中项 */
+const OU_VIEW_TABS = hotTopics.map(t=>t.theme).concat(['创作之星']);
+const OU_STAR_TAB = hotTopics.length;
+function OU_buildView(i){
+  if(i === OU_STAR_TAB) return {title: '创作之星 · 完整榜单', cardsHTML: OU_starCards().map(OU_card).join('')};
+  const t = hotTopics[i];
+  return {title: `热玩趋势 · ${t.theme}`, cardsHTML: OU_hotCards(t).map(OU_card).join('')};
+}
+function OU_openViewAt(i){
+  OU_openView({tabs: OU_VIEW_TABS, active: i, build: OU_buildView});
+}
+/* 热玩趋势：打开当前轮播话题对应的页签 */
+function OU_openList(ti){
+  OU_openViewAt(Math.min(Math.max(0, ti | 0), hotTopics.length - 1));
+}
+function OU_openGame(g){
+  OUModal.show('half', `
+    <div class="mdwrap">
+      <div class="mdcov" style="background:linear-gradient(125deg,${g.c1},${g.c2})">
+        <span class="mdico">${g.wico || g.emoji || '🎮'}</span>
+        <span class="mdplay">${SVG_PAD}${g.plays}</span>
+        <span class="mdtag">${g.wtag || g.tag || '玩法'}</span>
+      </div>
+      <div class="mdinfo">
+        <h2>${g.name}</h2>
+        <div class="mdmeta">
+          <span class="mdau">${SVG_USER}${g.author || '热门玩法'}</span>
+          <span>${g.wtag || g.tag || '玩法'}</span>
+        </div>
+        <p class="mdnote">玩法详情页（示意）</p>
+        <p class="mddesc">这里会放玩法简介、实机截图、操作说明与「立即开玩」入口。当前版本仅做点击跳转示意，细节未展开。</p>
+        <div class="mline" style="width:86%"></div>
+        <div class="mline" style="width:64%"></div>
+        <div class="mline" style="width:72%"></div>
+      </div>
+    </div>`);
+}
+function OU_openAuthor(c){
+  const works = [c.work, '未命名作品', '未命名作品', '未命名作品'];
+  OUModal.show('full', `
+    <div class="mauwrap">
+      <div class="mau-top">
+        <span class="mau-ava" style="background:linear-gradient(135deg,${c.c1},${c.c2})">${c.ava}</span>
+        <div class="mau-txt">
+          <h2>${c.name}</h2>
+          <div class="mau-sub">${c.fans} 粉丝 · 共创作者</div>
+        </div>
+      </div>
+      <p class="mdnote">作者客态主页（示意）</p>
+      <p class="mddesc">这里会展示作者简介、关注按钮与完整作品列表。当前版本仅做跳转示意，细节未展开。</p>
+      <div class="maugrid">
+        ${works.map((w,i)=>`<div class="mau-card">
+          <span class="mau-ph" style="background:linear-gradient(135deg,${c.c1},${c.c2})">${i===0?c.wico:'🎮'}</span>
+          <span class="mau-nm">${w}</span>
+        </div>`).join('')}
+      </div>
+    </div>`);
+}
+
+/* 创作之星榜单：与热玩趋势完全一致的玩法卡（作者名 + 游玩数 + 玩法图标 + 品类 + 玩法名），点击进入玩法详情 */
+function OU_starCards(){
+  const base = creators.map(c=>({name:c.work, wico:c.wico, wtag:c.wtag, plays:c.plays, author:c.name, c1:c.c1, c2:c.c2}));
+  const more = games
+    .filter(g => !base.some(b => b.name === g.name))
+    .slice(0, Math.max(0, 9 - base.length))
+    .map(g=>({name:g.name, wico:g.emoji, wtag:g.tag, plays:g.players, author:g.author, c1:g.c1, c2:g.c2}));
+  return base.concat(more);
+}
+/* 创作之星：与热玩趋势同一个弹层，仅默认选中「创作之星」页签，不再细分总榜 / 粉丝榜 */
+function OU_openRank(){
+  OU_openViewAt(OU_STAR_TAB);
+}
+
+/* ---------------- 自适应缩放 ---------------- */
+(function fit(){
+  const vp = $('#viewport');
+  const resize = () => {
+    const s = Math.min(innerWidth / 2560, innerHeight / 1600) * 0.94;
+    vp.style.transform = `scale(${s})`;
+  };
+  addEventListener('resize', resize);
+  resize();
+})();
+
+/* ---------------- 布局说明 ---------------- */
+(function anno(){
+  $('.trends').insertAdjacentHTML('afterbegin', '<div class="anno-chip">2</div>');
+  const btn = $('#toggleAnno');
+  btn.addEventListener('click', () => {
+    const on = document.body.classList.toggle('annotate');
+    btn.textContent = on ? '隐藏布局说明' : '显示布局说明';
+  });
+})();
+
+/* ---------------- 右侧页签切换 ---------------- */
+[['#rail','.rail-item'], ['#rail2','.rail2-item']].forEach(([id, sel]) => {
+  $(id).addEventListener('click', e => {
+    const it = e.target.closest(sel);
+    if(!it) return;
+    $$(sel, $(id)).forEach(x => x.classList.toggle('on', x === it));
+  });
+});
+</script>
+<script>
+/* ---------------- 工坊 · 抢先体验：灰度内测名额 / 资格有效期 / 额度限制 ---------------- */
+(function workshopView(){
+  const stage = document.getElementById('stage');
+  const railW = document.getElementById('railW');
+  const grid  = document.getElementById('wkGrid');
+  if(!stage || !railW || !grid) return;
+
+  const HOUR = 36e5, TTL = 168 * HOUR;   /* 资格有效期 7 天（按玩家单独计时） */
+  const MAX_A = 10;                      /* 同时持有的资格上限 A */
+  const GAP   = 5;                       /* A - B 达到 5 时不能再抢 */
+  const KEY   = 'wkEarly.v2';   /* v2：预约改为纯展示状态，旧演示存档作废 */
+
+  const FLAME = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 1.6c.3 3.1-1.5 4.4-3 6.1-1.6 1.8-3.2 3.7-3.2 6.6A6.9 6.9 0 0 0 12 21.2a5.6 5.6 0 0 0 5.6-5.7c0-2.6-1.2-4.4-2.5-5.9-1.1-1.4-1.9-2.6-1.7-4.4-1.4.7-2.2 1.9-2.6 3.3-.6-2.6.7-5.1 2.6-6.9Z"/></svg>';
+
+  /* 玩法池：quota = 内测名额，taken = 已被抢名额（全局状态） */
+  const POOL = [
+    {id:'sky',    name:'天空之城 · 重建版', heat:'32.5万', tags:['建筑','解谜','跑酷'], emoji:'🏰', c1:'#22d3ee', c2:'#3b82f6', quota:8000, taken:7612},
+    {id:'star',   name:'极速星河',          heat:'46.2万', tags:['载具','竞速','休闲'], emoji:'🚀', c1:'#f59e0b', c2:'#ef4444', quota:5000, taken:5000},
+    {id:'deep',   name:'深海列岛',          heat:'18.7万', tags:['生存','建造','联机'], emoji:'🐳', c1:'#0ea5e9', c2:'#6366f1', quota:3000, taken:2850},
+    {id:'orange', name:'橘子镇派对',        heat:'9.6万',  tags:['派对','社交','趣味'], emoji:'🍊', c1:'#34d399', c2:'#0ea5e9', quota:2000, taken:1880},
+    {id:'fog',    name:'迷雾要塞',          heat:'12.4万', tags:['塔防','策略','闯关'], emoji:'🏯', c1:'#a78bfa', c2:'#ec4899', quota:1200, taken:1196},
+    {id:'lava',   name:'熔岩矿车',          heat:'5.8万',  tags:['矿工','收集','冒险'], emoji:'⛏️', c1:'#f97316', c2:'#dc2626', quota:600,  taken:598},
+    {id:'cloud',  name:'云端牧场',          heat:'7.3万',  tags:['养成','经营','治愈'], emoji:'🐄', c1:'#4ade80', c2:'#0284c7', quota:900,  taken:742},
+    {id:'lab',    name:'粒子实验室',        heat:'3.1万',  tags:['沙盒','物理','创造'], emoji:'🧪', c1:'#818cf8', c2:'#a855f7', quota:400,  taken:365}
+  ];
+  const NOW = () => Date.now();
+  const byId = id => POOL.find(p => p.id === id);
+
+  /* ---------------- 存档（单玩家视角） ---------------- */
+  let db = load();
+  function load(){
+    try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    const d = {items:{}};
+    POOL.forEach(p => d.items[p.id] = {taken:p.taken, grant:null, used:false, dl:false, rsv:false});
+    d.items.sky.grant = NOW() - 23 * HOUR;   /* 演示初始：已持有一个资格，剩余约 6 天 */
+    d.items.deep.rsv = true;                 /* 演示初始：已预约正式版（仅展示状态） */
+    return d;
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){} }
+  function sweep(){                          /* 有效期到点自动失效并释放名额 */
+    const t = NOW(); let dirty = false;
+    POOL.forEach(p => {
+      const it = db.items[p.id];
+      if(!it) return;
+      if(it.grant && t - it.grant >= TTL){
+        it.grant = null; it.used = false; it.dl = false; it.taken = Math.max(0, it.taken - 1); dirty = true;
+      }
+    });
+    if(dirty) save();
+  }
+  const own = id => !!db.items[id].grant;
+
+  /* ---------------- 玩家额度：A = 有效资格玩法数，B = 其中已参与数 ---------------- */
+  let st = {A:0, B:0, room:0};
+  function calc(){
+    sweep();
+    const A = POOL.filter(p => own(p.id)).length;
+    const B = POOL.filter(p => own(p.id) && db.items[p.id].used).length;
+    st = {A, B, room: Math.max(0, Math.min(MAX_A - A, GAP - (A - B)))};
+  }
+
+  /* ---------------- 状态判定 ---------------- */
+  const left = ts => {
+    const ms = TTL - (NOW() - ts);
+    if(ms <= 0) return '已过期';
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+    return d > 0 ? ('剩 ' + d + '天' + (h ? h + '时' : '')) : (h > 0 ? ('剩 ' + h + '时' + m + '分') : ('剩 ' + Math.max(1, m) + '分'));
+  };
+  function stateOf(p){
+    const it = db.items[p.id];
+    if(it.grant) return {k:'own',  label:'已获得内测资格', note:left(it.grant)};
+    if(it.taken >= p.quota) return {k:'full', label:'测试名额已满', note:'名额已抢完'};
+    if(st.room > 0) return {k:'open', label:'可报名', note:'剩 ' + (p.quota - it.taken) + ' 个名额'};
+    return {k:'lock', label:'无法报名', note: st.A >= MAX_A ? ('已有 ' + MAX_A + ' 个资格，达到上限') : ('已领未参与 ' + (st.A - st.B) + ' 个，需先参与')};
+  }
+  const btnOf = p => {
+    const s = stateOf(p), it = db.items[p.id];
+    if(s.k === 'own') return (it.used || it.dl) ? {t:'确定', off:false} : {t:'下载', off:false};
+    if(s.k === 'full') return {t:'测试名额已满', off:true};
+    if(s.k === 'open') return {t:'下载', off:false};
+    return {t:'无法报名', off:true};
+  };
+
+  /* ---------------- 卡片渲染 ---------------- */
+  let seg = 'all';                           /* 子页签：all=全部，rsv=我的预约 */
+  const card = (p, mode) => {
+    const s = stateOf(p), b = btnOf(p), it = db.items[p.id], rsv = mode === 'rsv';
+    /* 名额已满 / 无法报名：右下角不展示按钮，仅保留右上角状态标签 */
+    const ok = actOf(p) === 'confirm';       /* 确定 = 黄底，下载 = 白底 */
+    /* 我的预约页：卡片上只保留「取消预约」 */
+    const btn = rsv ? `<button class="wk-dl" type="button" data-act="unrsv">取消预约</button>` :
+      ((s.k === 'full' || s.k === 'lock') ? '' :
+      `<button class="wk-dl${b.off ? ' off' : ''}${ok ? ' ok' : ''}" type="button" data-act="main"${b.off ? ' disabled' : ''}>${b.t}</button>`);
+    /* 可报名：右上角无需「可报名」标签，只留预约标签 */
+    const stateTag = (rsv || s.k === 'open') ? '' :
+      `<span class="wk-state">${s.label}${s.k === 'own' ? '<em>（剩余' + s.note.replace(/^剩\s*/, '') + '）</em>' : ''}</span>`;
+    /* 我的预约页：不展示预约状态标签与左上角热度徽标 */
+    const rsvTag = rsv ? '' : `<span class="wk-rsv${it.rsv ? ' on' : ''}">${it.rsv ? '已预约正式版' : '可预约正式版'}</span>`;
+    const heat = rsv ? '' : `<span class="wk-heat">${FLAME}<b>${p.heat}</b></span>`;
+    return `<article class="wk-card s-${s.k}" data-id="${p.id}" style="background:linear-gradient(125deg,${p.c1},${p.c2})">
+      <span class="wk-cov"></span>
+      <span class="wk-art">${p.emoji}</span>
+      ${heat}
+      <div class="wk-side">
+        ${stateTag}${rsvTag}
+      </div>
+      <div class="wk-foot">
+        <div class="wk-el">
+          <h3 class="wk-name"><span class="nm">${p.name}</span><em>（体验版）</em></h3>
+          <div class="wk-tags">${p.tags.map((t, k) => (k ? '<i>|</i>' : '') + '<em>' + t + '</em>').join('')}</div>
+        </div>
+        ${btn}
+      </div>
+    </article>`;
+  };
+  function bar(){
+    const s = st;
+    document.getElementById('wkA').textContent = s.A;
+    document.getElementById('wkB').textContent = s.B;
+    document.getElementById('wkLeft').textContent = s.room;
+    document.getElementById('wkBar').classList.toggle('rv', seg === 'rsv');
+    document.getElementById('wkFoot').style.display = seg === 'rsv' ? 'none' : '';
+    document.getElementById('wkWhy').textContent = s.room > 0 ? '' :
+      (s.A >= MAX_A ? '资格已达 ' + MAX_A + ' 个上限，需等资格过期或参与后释放'
+        : '已获得资格但未参与的玩法已达到' + GAP + '个，无法报名参与其他玩法，请先体验已获得测试资格玩法');
+  }
+  function render(){
+    calc();
+    const list = seg === 'rsv' ? POOL.filter(p => db.items[p.id].rsv) : POOL;
+    grid.innerHTML = list.length ? list.map(p => card(p, seg)).join('') :
+      '<p class="wk-empty">还没有预约正式版的玩法，去「全部」选一个吧</p>';
+    bar();
+  }
+
+  /* ---------------- 交互 ---------------- */
+  const toast = document.getElementById('wkToast');
+  let tt = 0;
+  const tip = msg => {
+    if(!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('on');
+    clearTimeout(tt);
+    tt = setTimeout(() => toast.classList.remove('on'), 2000);
+  };
+  const actOf = p => {                        /* 按钮语义：download=下载，confirm=确定 */
+    const it = db.items[p.id];
+    return (it.grant && (it.dl || it.used)) ? 'confirm' : 'download';
+  };
+  function download(p){                       /* 点「下载」：可报名玩法当场抢名额，但不计为已参与 */
+    const s = stateOf(p), it = db.items[p.id];
+    if(s.k === 'full'){ tip('测试名额已满，下次早点来'); return; }
+    if(s.k === 'lock'){ tip(s.note + '，暂不能抢新资格'); return; }
+    if(s.k === 'own'){
+      if(it.used){ tip('已确认「' + p.name + '」'); return; }
+      it.dl = true; save(); render();
+      tip('已下载「' + p.name + '」，点击「确定」才计为本次参与');
+      return;
+    }
+    it.taken = Math.min(p.quota, it.taken + 1);   /* 下载同时占用一个内测名额 */
+    it.grant = NOW(); it.dl = true; it.used = false;
+    save(); render();
+    tip('已下载「' + p.name + '」，同时抢到 7 天测试资格');
+  }
+  function confirmIt(p){                      /* 点「确定」：此时才计为本次参与 */
+    const it = db.items[p.id];
+    if(!it.grant) return;
+    if(it.used){ tip('已确认「' + p.name + '」'); return; }
+    it.used = true; save(); render();
+    tip('已确认「' + p.name + '」，计为本次参与');
+  }
+  function toggleRsv(p){                      /* 详情页：预约 / 取消预约正式版 */
+    const it = db.items[p.id];
+    it.rsv = !it.rsv; save(); render();
+    const el = document.querySelector('.stage>.mlayer .mdacts [data-wkrsv]');
+    if(el){ el.textContent = it.rsv ? '取消预约' : '预约正式版'; el.classList.toggle('on', !!it.rsv); }
+    tip(it.rsv ? '已预约「' + p.name + '」正式版' : '已取消「' + p.name + '」的正式版预约');
+  }
+  function openDetail(p){
+    const s = stateOf(p), it = db.items[p.id], b = btnOf(p);
+    OUModal.show('half', `
+      <div class="mdwrap">
+        <div class="mdcov" style="background:linear-gradient(125deg,${p.c1},${p.c2})">
+          <span class="mdico">${p.emoji}</span>
+          <span class="mdplay">${FLAME}${p.heat}</span>
+          <span class="mdtag">抢先体验</span>
+        </div>
+        <div class="mdinfo">
+          <h2>${p.name}<em class="mdver">（体验版）</em></h2>
+          <div class="mdmeta">
+            <span class="mdau">官方玩法</span>
+            <span>抢先体验</span>
+            <span class="md-state ${s.k}">${s.label}</span>
+          </div>
+          <p class="mdnote">${s.k === 'own' ? '本次内测资格剩余' + s.note.replace(/^剩\s*/, '') + '（过期后自动失效并释放名额）' : '灰度内测 · ' + s.note}</p>
+          <p class="mddesc">名额 ${it.taken} / ${p.quota}，先到先得；抢到后资格 7 天内有效，过期自动失效并释放名额。同时持有的资格不超过 ${MAX_A} 个，「已领未参与」达到 ${GAP} 个后需先参与才能继续抢。正式版预约与内测资格互不影响。</p>
+          <div class="mline" style="width:86%"></div>
+          <div class="mline" style="width:64%"></div>
+          <div class="mline" style="width:72%"></div>
+          <div class="mdacts">
+            <button class="mdact ghost${it.rsv ? ' on' : ''}" type="button" data-wkrsv="${p.id}">${it.rsv ? '取消预约' : '预约正式版'}</button>
+            <button class="mdact${b.off ? ' off' : ''}${(!b.off && actOf(p) === 'confirm') ? ' ok' : ''}" type="button" data-wk="${p.id}"${b.off ? ' disabled' : ''}>${b.t}</button>
+          </div>
+        </div>
+      </div>`);
+  }
+
+  grid.addEventListener('click', e => {
+    const cardEl = e.target.closest('.wk-card');
+    if(!cardEl) return;
+    const p = byId(cardEl.dataset.id);
+    if(!p) return;
+    const act = e.target.closest('[data-act]');
+    if(e.target.closest('.wk-rsv')){ e.stopPropagation(); return; }   /* 预约状态仅展示，不响应点击 */
+    if(!act){ openDetail(p); return; }
+    e.stopPropagation();
+    if(act.dataset.act === 'unrsv'){ toggleRsv(p); return; }   /* 我的预约页：取消预约 */
+    if(act.dataset.act === 'main'){
+      if(actOf(p) === 'confirm') confirmIt(p); else download(p);
+    }
+  });
+  /* 详情页内的同一状态按钮 */
+  const layerEl = document.querySelector('.stage>.mlayer');
+  if(layerEl) layerEl.addEventListener('click', e => {
+    const r = e.target.closest('[data-wkrsv]');
+    if(r){ const pr = byId(r.dataset.wkrsv); if(pr) toggleRsv(pr); return; }
+    const b = e.target.closest('[data-wk]');
+    if(!b || b.disabled) return;
+    const p = byId(b.dataset.wk);
+    if(!p) return;
+    if(actOf(p) === 'confirm'){                 /* 确定 → 计入已参与并关闭详情 */
+      confirmIt(p); OUModal.close(); return;
+    }
+    download(p);                                /* 下载（可报名时同时抢名额）→ 详情按钮态变为「确定」 */
+    if(stateOf(p).k === 'own') openDetail(p);
+  });
+  document.getElementById('wkReset').addEventListener('click', () => {
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    db = load(); render(); tip('演示数据已重置');
+  });
+
+  /* 问号规则浮窗 */
+  const wkQ = document.getElementById('wkQ'), wkPop = document.getElementById('wkPop');
+  const closePop = () => { wkPop.classList.remove('show'); wkQ.setAttribute('aria-expanded', 'false'); };
+  wkQ.addEventListener('click', e => {
+    e.stopPropagation();
+    const on = !wkPop.classList.contains('show');
+    wkPop.classList.toggle('show', on);
+    wkQ.setAttribute('aria-expanded', on ? 'true' : 'false');
+  });
+  document.addEventListener('click', e => {
+    if(!wkPop.classList.contains('show')) return;
+    if(e.target.closest('.wk-qwrap')) return;
+    closePop();
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closePop(); });
+
+  /* 「全部 / 我的预约」子页签 */
+  document.getElementById('wkSegs').addEventListener('click', e => {
+    const b = e.target.closest('.wk-seg');
+    if(!b) return;
+    seg = b.dataset.seg;
+    Array.prototype.forEach.call(document.querySelectorAll('#wkSegs .wk-seg'), x => x.classList.toggle('on', x === b));
+    closePop();
+    render();
+  });
+
+  /* 我要反馈 */
+  document.getElementById('wkFb').addEventListener('click', () => {
+    tip('已收到你的反馈，我们会持续关注该玩法的体验');
+  });
+
+  /* 工坊子页签：仅「抢先体验」有页面，其余为位置预留 */
+  const TABS = {pick:'精选', rec:'推荐', 'new':'上新专区', early:'抢先体验'};
+  const HOLD = '<b>位置预留</b> · 页签示意，暂不提供页面';
+  const META = {pick:HOLD, rec:HOLD, 'new':HOLD, early:''};
+  function switchTab(key){
+    Array.prototype.forEach.call(railW.querySelectorAll('.rail-item'), b => b.classList.toggle('on', b.dataset.tab === key));
+    const isEarly = key === 'early';
+    document.getElementById('wkPaneEarly').classList.toggle('on', isEarly);
+    document.getElementById('wkPanePh').classList.toggle('on', !isEarly);
+    document.getElementById('wkSegs').style.display = isEarly ? '' : 'none';
+    document.getElementById('wkMeta').innerHTML = META[key];
+    if(!isEarly) document.getElementById('wkPhTitle').textContent = '「' + TABS[key] + '」页面位置预留';
+    else render();
+  }
+  railW.addEventListener('click', e => {
+    const it = e.target.closest('.rail-item');
+    if(it) switchTab(it.dataset.tab);
+  });
+
+  /* 一级页签：工坊 / 共创 视图切换 */
+  document.getElementById('rail2').addEventListener('click', e => {
+    const it = e.target.closest('.rail2-item');
+    if(!it || !it.dataset.view) return;
+    stage.dataset.view = it.dataset.view;
+    if(it.dataset.view === 'workshop') render();
+  });
+
+  render();
+  setInterval(render, 30000);   /* 每 30 秒刷新倒计时与过期状态 */
+})();
+</script>
+</body>
+</html>
